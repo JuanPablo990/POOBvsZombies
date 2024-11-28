@@ -1,0 +1,380 @@
+package presentation;
+
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+
+public class POOBvsZombiesGUI extends JFrame {
+
+    FondoPanel fondo = new FondoPanel();
+
+    // Declaración de botones
+    JButton buttonPVSM = new JButton();
+    JButton buttonMVSM = new JButton();
+    JButton buttonPVP = new JButton();
+
+    public POOBvsZombiesGUI() {
+        this.setContentPane(fondo);
+        setBounds(100, 100, 800, 600);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setTitle("POOBvsZombies");
+
+        // Crear barra de menús
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+
+        JMenu menuArchivo = new JMenu("Archivo");
+        menuBar.add(menuArchivo);
+
+        // Crear elementos del menú
+        JMenuItem menuItemNew = new JMenuItem("Nuevo");
+        JMenuItem menuItemOpen = new JMenuItem("Abrir");
+        JMenuItem menuItemSave = new JMenuItem("Salvar");
+        JMenuItem menuItemImport = new JMenuItem("Importar");
+        JMenuItem menuItemExport = new JMenuItem("Exportar");
+        JMenuItem menuItemExit = new JMenuItem("Salir");
+
+        // Añadir los elementos al menú "Archivo"
+        menuArchivo.add(menuItemNew);
+        menuArchivo.add(menuItemOpen);
+        menuArchivo.add(menuItemSave);
+        menuArchivo.add(menuItemImport);
+        menuArchivo.add(menuItemExport);
+        menuArchivo.addSeparator();
+        menuArchivo.add(menuItemExit);
+
+        // Acciones de los elementos del menú
+        menuItemExit.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea salir?", "Confirmar salida",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        });
+
+        // Configurar botones con imágenes
+        configureButtonWithImage(buttonPVSM, "/images/PVSM.png", 200, 250);
+        configureButtonWithImage(buttonMVSM, "/images/MvsM.png", 200, 250);
+        configureButtonWithImage(buttonPVP, "/images/PVP.png", 200, 250);
+
+        // Añadir acciones a los botones
+        buttonPVSM.addActionListener(e -> abrirVentanaPvsM());
+        buttonMVSM.addActionListener(e -> JOptionPane.showMessageDialog(this, "Ventana MVSM aún no implementada"));
+        buttonPVP.addActionListener(e -> JOptionPane.showMessageDialog(this, "Ventana PVP aún no implementada"));
+
+        // Añadir botones al panel
+        fondo.setLayout(null);
+        fondo.add(buttonPVSM);
+        fondo.add(buttonMVSM);
+        fondo.add(buttonPVP);
+
+        // Configurar posiciones iniciales
+        repositionButtons();
+
+        // Listener para redimensionar los botones dinámicamente
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                repositionButtons();
+            }
+        });
+
+        // Confirmación al cerrar con la "X"
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int confirm = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea salir?", "Confirmar salida",
+                        JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+            }
+        });
+    }
+
+    private void abrirVentanaPvsM() {
+        JFrame ventanaPvsM = new JFrame("Player vs Machine");
+        ventanaPvsM.setSize(400, 400);
+        ventanaPvsM.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        FondoPanel ventanaFondo = new FondoPanel("/images/ventana1.png");
+        ventanaPvsM.setContentPane(ventanaFondo);
+        ventanaPvsM.setLayout(null);
+
+        JPanel panelTransparente = new JPanel();
+        panelTransparente.setBounds(30, 30, 340, 300);
+        panelTransparente.setBackground(new Color(255, 255, 255, 200));
+        panelTransparente.setLayout(null);
+        ventanaPvsM.add(panelTransparente);
+
+        JLabel labelNombre = new JLabel("Nombre del jugador:");
+        labelNombre.setBounds(20, 20, 150, 30);
+        labelNombre.setFont(new Font("Arial", Font.BOLD, 14));
+        panelTransparente.add(labelNombre);
+
+        JTextField textNombre = new JTextField();
+        textNombre.setBounds(180, 20, 140, 30);
+        panelTransparente.add(textNombre);
+
+        JLabel labelRol = new JLabel("¿Qué quieres ser?");
+        labelRol.setBounds(20, 70, 150, 30);
+        labelRol.setFont(new Font("Arial", Font.BOLD, 14));
+        panelTransparente.add(labelRol);
+
+        JRadioButton radioPlanta = new JRadioButton("Planta");
+        radioPlanta.setBounds(180, 70, 70, 30);
+        panelTransparente.add(radioPlanta);
+
+        JRadioButton radioZombi = new JRadioButton("Zombi");
+        radioZombi.setBounds(250, 70, 70, 30);
+        panelTransparente.add(radioZombi);
+
+        ButtonGroup grupoRol = new ButtonGroup();
+        grupoRol.add(radioPlanta);
+        grupoRol.add(radioZombi);
+
+        JLabel labelTiempo = new JLabel("Tiempo de partida (min):");
+        labelTiempo.setBounds(20, 120, 200, 30);
+        labelTiempo.setFont(new Font("Arial", Font.BOLD, 14));
+        panelTransparente.add(labelTiempo);
+
+        JTextField textTiempo = new JTextField();
+        textTiempo.setBounds(180, 120, 140, 30);
+        panelTransparente.add(textTiempo);
+
+        JLabel labelHordas = new JLabel("Cantidad de hordas:");
+        labelHordas.setBounds(20, 170, 150, 30);
+        labelHordas.setFont(new Font("Arial", Font.BOLD, 14));
+        panelTransparente.add(labelHordas);
+
+        JTextField textHordas = new JTextField();
+        textHordas.setBounds(180, 170, 140, 30);
+        panelTransparente.add(textHordas);
+
+        JButton botonEmpezar = new JButton("Empezar a Jugar");
+        botonEmpezar.setBounds(90, 230, 150, 40);
+        panelTransparente.add(botonEmpezar);
+
+        botonEmpezar.addActionListener(e -> {
+            String nombreJugador = textNombre.getText();
+            String rol = radioPlanta.isSelected() ? "Planta" : radioZombi.isSelected() ? "Zombi" : "";
+            String tiempoTexto = textTiempo.getText();
+            String hordasTexto = textHordas.getText();
+
+            if (nombreJugador.isEmpty() || rol.isEmpty() || tiempoTexto.isEmpty() || hordasTexto.isEmpty()) {
+                JOptionPane.showMessageDialog(ventanaPvsM, "Por favor, completa todos los campos.");
+            } else {
+                try {
+                    int tiempo = Integer.parseInt(tiempoTexto);
+                    int hordas = Integer.parseInt(hordasTexto);
+                    if (tiempo <= 0 || hordas <= 0) {
+                        JOptionPane.showMessageDialog(ventanaPvsM, "El tiempo y las hordas deben ser mayores a 0.");
+                    } else {
+                        ventanaPvsM.dispose();
+                        abrirVentanaJuego(nombreJugador, rol, tiempo, hordas);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(ventanaPvsM, "Por favor, ingresa valores válidos.");
+                }
+            }
+        });
+
+        ventanaPvsM.setLocationRelativeTo(this);
+        ventanaPvsM.setVisible(true);
+    }
+
+    private void abrirVentanaJuego(String nombreJugador, String rol, int tiempo, int hordas) {
+        JFrame ventanaJuego = new JFrame("POOBvsZombies - Juego");
+        ventanaJuego.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        ventanaJuego.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Crear barra de menús
+        JMenuBar menuBar = new JMenuBar();
+        ventanaJuego.setJMenuBar(menuBar);
+
+        JMenu menuArchivo = new JMenu("Archivo");
+        menuBar.add(menuArchivo);
+
+        JMenuItem menuItemNew = new JMenuItem("Nuevo");
+        JMenuItem menuItemOpen = new JMenuItem("Abrir");
+        JMenuItem menuItemSave = new JMenuItem("Salvar");
+        JMenuItem menuItemImport = new JMenuItem("Importar");
+        JMenuItem menuItemExport = new JMenuItem("Exportar");
+        JMenuItem menuItemExit = new JMenuItem("Salir");
+
+        menuArchivo.add(menuItemNew);
+        menuArchivo.add(menuItemOpen);
+        menuArchivo.add(menuItemSave);
+        menuArchivo.add(menuItemImport);
+        menuArchivo.add(menuItemExport);
+        menuArchivo.addSeparator();
+        menuArchivo.add(menuItemExit);
+
+        menuItemExit.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(ventanaJuego, "¿Está seguro de que desea salir?", "Confirmar salida",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                ventanaJuego.dispose();
+            }
+        });
+
+        // Panel principal
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        ventanaJuego.setContentPane(panelPrincipal);
+
+        // Panel superior (NORTE)
+        JPanel panelNorte = new JPanel(new GridLayout(1, 11));
+        panelNorte.setPreferredSize(new Dimension(0, 100));
+        for (int i = 1; i <= 11; i++) {
+            JLabel label = new JLabel("Info " + i, SwingConstants.CENTER);
+            label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            panelNorte.add(label);
+        }
+        panelPrincipal.add(panelNorte, BorderLayout.NORTH);
+
+        // Panel central (CENTRO)
+        JPanel panelCentro = new JPanel(new GridLayout(5, 10));
+        JButton[][] botones = new JButton[5][10];
+
+        for (int fila = 0; fila < 5; fila++) {
+            for (int col = 0; col < 10; col++) {
+                JButton boton = new JButton();
+                boton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                boton.setBackground(new Color(0, 100, 0)); // Verde oscuro
+                boton.setOpaque(true);
+                botones[fila][col] = boton;
+
+                // Determinar la imagen según la posición
+                String imagePath;
+                if (col == 0) {
+                    imagePath = "/images/piso_casa.png";
+                } else if (col == 9) {
+                    imagePath = "/images/padimento_zombies.png";
+                } else {
+                    imagePath = "/images/pasto.png";
+                }
+
+                // Asignar la imagen al botón
+                try {
+                    ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
+                    boton.addComponentListener(new ComponentAdapter() {
+                        @Override
+                        public void componentResized(ComponentEvent e) {
+                            if (boton.getWidth() > 0 && boton.getHeight() > 0) {
+                                Image scaledImage = icon.getImage().getScaledInstance(boton.getWidth(), boton.getHeight(), Image.SCALE_SMOOTH);
+                                boton.setIcon(new ImageIcon(scaledImage));
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println("No se pudo cargar la imagen para el botón: " + e.getMessage());
+                }
+
+                panelCentro.add(boton);
+            }
+        }
+        panelPrincipal.add(panelCentro, BorderLayout.CENTER);
+
+        // Panel inferior (SUR)
+        JPanel panelSur = new JPanel(new GridLayout(1, 2));
+        panelSur.setPreferredSize(new Dimension(0, 100));
+
+        JButton botonMenu = new JButton("Menú");
+        panelSur.add(botonMenu);
+
+        JPanel panelSurDerecho = new JPanel(new GridLayout(2, 1));
+        JLabel labelHordaActual = new JLabel("Horda: 1 de " + hordas, SwingConstants.CENTER);
+        JLabel labelTiempoHorda = new JLabel("Tiempo por horda: Calculando...", SwingConstants.CENTER);
+        panelSurDerecho.add(labelHordaActual);
+        panelSurDerecho.add(labelTiempoHorda);
+        panelSur.add(panelSurDerecho);
+
+        panelPrincipal.add(panelSur, BorderLayout.SOUTH);
+
+        // Lógica para cronómetros
+        new Thread(() -> {
+            int tiempoTotalSegundos = tiempo * 60;
+            int tiempoPorHorda = tiempoTotalSegundos / hordas;
+            int tiempoRestanteHorda = tiempoPorHorda;
+            int hordaActual = 1;
+
+            try {
+                for (int i = tiempoTotalSegundos; i >= 0; i--) {
+                    if (tiempoRestanteHorda == 0 && hordaActual < hordas) {
+                        hordaActual++;
+                        tiempoRestanteHorda = tiempoPorHorda;
+                        labelHordaActual.setText("Horda: " + hordaActual + " de " + hordas);
+                    }
+
+                    tiempoRestanteHorda--;
+                    labelTiempoHorda.setText("Tiempo por horda: " + tiempoRestanteHorda / 60 + ":" + tiempoRestanteHorda % 60);
+                    Thread.sleep(1000);
+                }
+                JOptionPane.showMessageDialog(ventanaJuego, "¡Juego terminado!");
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
+
+        ventanaJuego.setVisible(true);
+    }
+
+
+    private void configureButtonWithImage(JButton button, String imagePath, int width, int height) {
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
+            Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            button.setIcon(new ImageIcon(scaledImage));
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar la imagen: " + imagePath);
+        }
+    }
+
+    private void repositionButtons() {
+        int buttonWidth = 200;
+        int buttonHeight = 250;
+        int spacing = 50;
+        int windowWidth = fondo.getWidth();
+        int windowHeight = fondo.getHeight();
+
+        int startX = (windowWidth - (3 * buttonWidth + 2 * spacing)) / 2;
+        int startY = windowHeight - 300;
+
+        buttonPVSM.setBounds(startX, startY, buttonWidth, buttonHeight);
+        buttonMVSM.setBounds(startX + buttonWidth + spacing, startY, buttonWidth, buttonHeight);
+        buttonPVP.setBounds(startX + 2 * (buttonWidth + spacing), startY, buttonWidth, buttonHeight);
+        fondo.repaint();
+    }
+
+    public static void main(String[] args) {
+        POOBvsZombiesGUI frame = new POOBvsZombiesGUI();
+        frame.setVisible(true);
+    }
+
+    class FondoPanel extends JPanel {
+        private Image imagen;
+
+        public FondoPanel() {
+            this("/images/menu.png");
+        }
+
+        public FondoPanel(String imagePath) {
+            try {
+                this.imagen = new ImageIcon(getClass().getResource(imagePath)).getImage();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al cargar la imagen de fondo: " + imagePath);
+            }
+        }
+
+        @Override
+        public void paint(Graphics g) {
+            if (imagen != null) {
+                g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+            }
+            setOpaque(false);
+            super.paint(g);
+        }
+    }
+}
