@@ -1,12 +1,16 @@
 package presentation;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 
 public class POOBvsZombiesGUI extends JFrame {
 
     FondoPanel fondo = new FondoPanel();
+    private Clip backgroundMusic;
 
     // Declaración de botones
     JButton buttonPVSM = new JButton();
@@ -19,28 +23,31 @@ public class POOBvsZombiesGUI extends JFrame {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setTitle("POOBvsZombies");
 
+        // Iniciar música de fondo
+        startBackgroundMusic("/presentation/songs/menu.wav");
+
         // Crear barra de menús
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        JMenu menuArchivo = new JMenu("Archivo");
-        menuBar.add(menuArchivo);
+        JMenu menuFile = new JMenu("Archive");
+        menuBar.add(menuFile);
 
-        JMenuItem menuItemExit = new JMenuItem("Salir");
-        menuArchivo.add(menuItemExit);
+        JMenuItem menuItemExit = new JMenuItem("Exit");
+        menuFile.add(menuItemExit);
 
         // Acción para salir
-        menuItemExit.addActionListener(e -> confirmarSalida());
+        menuItemExit.addActionListener(e -> confirmExit());
 
         // Configurar botones con imágenes
-        configureButtonWithImage(buttonPVSM, "/presentation/images/PVSM.png", 200, 250);
-        configureButtonWithImage(buttonMVSM, "/presentation/images/MvsM.png", 200, 250);
-        configureButtonWithImage(buttonPVP, "/presentation/images/PVP.png", 200, 250);
+        configureButtonWithImage(buttonPVSM, "/presentation/images/windows/PVSM.png", 200, 250);
+        configureButtonWithImage(buttonMVSM, "/presentation/images/windows/MvsM.png", 200, 250);
+        configureButtonWithImage(buttonPVP, "/presentation/images/windows/PVP.png", 200, 250);
 
         // Añadir acciones a los botones
-        buttonPVSM.addActionListener(e -> abrirVentanaPvsM());
-        buttonMVSM.addActionListener(e -> JOptionPane.showMessageDialog(this, "Ventana MVSM aún no implementada"));
-        buttonPVP.addActionListener(e -> abrirVentanaPVP());
+        buttonPVSM.addActionListener(e -> openPvsMWindow());
+        buttonMVSM.addActionListener(e -> JOptionPane.showMessageDialog(this, "MVSM window not yet implemented"));
+        buttonPVP.addActionListener(e -> openPVPWindow());
 
         // Añadir botones al panel
         fondo.setLayout(null);
@@ -60,25 +67,46 @@ public class POOBvsZombiesGUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                confirmarSalida();
+                confirmExit();
             }
         });
     }
 
-    private void abrirVentanaPvsM() {
+    private void startBackgroundMusic(String musicPath) {
+        try {
+            File audioFile = new File(getClass().getResource(musicPath).getFile());
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            backgroundMusic = AudioSystem.getClip();
+            backgroundMusic.open(audioStream);
+            backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY); // Repetir continuamente
+            backgroundMusic.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            System.out.println("Error loading background music: " + e.getMessage());
+        }
+    }
+
+    private void stopBackgroundMusic() {
+        if (backgroundMusic != null && backgroundMusic.isRunning()) {
+            backgroundMusic.stop();
+            backgroundMusic.close();
+        }
+    }
+
+    private void openPvsMWindow() {
         VentanaPvsM ventanaPvsM = new VentanaPvsM(this);
         ventanaPvsM.setVisible(true);
     }
 
-    private void abrirVentanaPVP() {
-        VentanaPVP ventanaPVP = new VentanaPVP(this);
+    private void openPVPWindow() {
+        VentanaPVP ventanaPVP = new VentanaPVP(this, this::stopBackgroundMusic); // Paso el método para detener la música
         ventanaPVP.setVisible(true);
     }
 
-    private void confirmarSalida() {
-        int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea salir?", "Confirmar salida",
+    private void confirmExit() {
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Confirm exit",
                 JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
+            stopBackgroundMusic(); // Detener música al salir
             System.exit(0);
         }
     }
@@ -91,7 +119,7 @@ public class POOBvsZombiesGUI extends JFrame {
             button.setContentAreaFilled(false);
             button.setBorderPainted(false);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar la imagen: " + imagePath);
+            JOptionPane.showMessageDialog(this, "Error loading image: " + imagePath);
         }
     }
 
@@ -125,7 +153,7 @@ public class POOBvsZombiesGUI extends JFrame {
         private Image imagen;
 
         public FondoPanel() {
-            this("/presentation/images/menu.png");
+            this("/presentation/images/windows/menu.png");
         }
 
         public FondoPanel(String imagePath) {

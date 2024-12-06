@@ -17,30 +17,43 @@ public class VentanaPVP extends JFrame {
     private ArrayList<String> plantasSeleccionadas = new ArrayList<>();
     private ArrayList<String> zombiesSeleccionados = new ArrayList<>();
 
-    public VentanaPVP(JFrame parent) {
+    private Runnable stopMusicCallback; // Callback para detener la música
+
+    public VentanaPVP(JFrame parent, Runnable stopMusicCallback) {
+        this.stopMusicCallback = stopMusicCallback;
+
         // Configuración de la ventana
         setTitle("Player vs Player");
-        setSize(800, 700);
+        setSize(900, 750); // Tamaño ajustado para más espacio
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(parent);
 
         // Fondo personalizado con la imagen
-        FondoPanel fondo = new FondoPanel("/presentation/images/ventanapvp.jpeg");
+        FondoPanel fondo = new FondoPanel("/presentation/images/windows/ventanapvp.png");
         fondo.setLayout(new BorderLayout());
 
         // Panel translúcido para toda la información
-        JPanel panelTranslucido = new JPanel(new GridLayout(1, 2, 10, 10)) {
+        JPanel panelTranslucido = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f)); // Opacidad 90%
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f)); // Opacidad 60%
                 g2d.setColor(new Color(255, 255, 255));
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
         panelTranslucido.setOpaque(false);
-        panelTranslucido.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelTranslucido.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15)); // Bordes más amplios
+
+        // Tiempo de partida en la parte superior
+        JPanel tiempoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        tiempoPanel.setOpaque(false);
+        JLabel tiempoLabel = new JLabel("Match Duration (min):");
+        tiempoLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        duracionPartida = new JSpinner(new SpinnerNumberModel(5, 1, 60, 1)); // Duración en minutos
+        tiempoPanel.add(tiempoLabel);
+        tiempoPanel.add(duracionPartida);
 
         // Panel para Player 1 (Plants) en la izquierda
         JPanel panelPlayerPlants = createPlayerPanel("Player 1 (Plants):", true);
@@ -48,29 +61,18 @@ public class VentanaPVP extends JFrame {
         // Panel para Player 2 (Zombies) en la derecha
         JPanel panelPlayerZombies = createPlayerPanel("Player 2 (Zombies):", false);
 
-        // Agregar los paneles al panel translúcido
-        panelTranslucido.add(panelPlayerPlants);  // Plantas a la izquierda
-        panelTranslucido.add(panelPlayerZombies); // Zombies a la derecha
-
-        // Panel para "Tiempo de partida" y botones de acción
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setOpaque(false);
-
-        // Tiempo de partida centrado
-        JPanel tiempoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        tiempoPanel.setOpaque(false);
-        JLabel tiempoLabel = new JLabel("Tiempo de partida (min):");
-        tiempoLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        duracionPartida = new JSpinner(new SpinnerNumberModel(5, 1, 60, 1)); // Duración en minutos
-        tiempoPanel.add(tiempoLabel);
-        tiempoPanel.add(duracionPartida);
+        // Panel de jugadores
+        JPanel playersPanel = new JPanel(new GridLayout(1, 2, 20, 20)); // Espaciado ajustado
+        playersPanel.setOpaque(false);
+        playersPanel.add(panelPlayerPlants);  // Plantas a la izquierda
+        playersPanel.add(panelPlayerZombies); // Zombies a la derecha
 
         // Panel de botones para iniciar o volver
-        JPanel buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setOpaque(false);
-        JButton iniciarPartida = new JButton("Empezar a Jugar");
+        JButton iniciarPartida = new JButton("Start Game");
         iniciarPartida.setPreferredSize(new Dimension(200, 40)); // Botón más grande
-        JButton volver = new JButton("Volver");
+        JButton volver = new JButton("Back");
         buttonPanel.add(iniciarPartida);
         buttonPanel.add(volver);
 
@@ -81,27 +83,35 @@ public class VentanaPVP extends JFrame {
         iniciarPartida.addActionListener(e -> {
             String nombre1 = nombreJugador1.getText();
             String nombre2 = nombreJugador2.getText();
-            if (nombre1.isEmpty() || nombre2.isEmpty() || plantasSeleccionadas.size() != 5 || zombiesSeleccionados.size() != 5) {
-                JOptionPane.showMessageDialog(this, "Debe ingresar los nombres y seleccionar 5 plantas y 5 zombies.", "Error", JOptionPane.ERROR_MESSAGE);
+
+            if (nombre1.isEmpty() || nombre2.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "You must enter both player names.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Partida configurada:\n" +
-                                "Player 1: " + nombre1 + " (Soles iniciales: " + solesIniciales.getValue() + ")\n" +
-                                "Player 2: " + nombre2 + " (Cerebros iniciales: " + cerebrosIniciales.getValue() + ")\n" +
-                                "Duración: " + duracionPartida.getValue() + " minutos\n" +
-                                "Plantas seleccionadas: " + plantasSeleccionadas + "\n" +
-                                "Zombies seleccionados: " + zombiesSeleccionados);
-                dispose();
+                // Detener la música
+                if (stopMusicCallback != null) {
+                    stopMusicCallback.run();
+                }
+
+                // Abrir VentanaJuegoPVP
+                SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
+                        nombre1,
+                        nombre2,
+                        (int) solesIniciales.getValue(),
+                        (int) cerebrosIniciales.getValue(),
+                        (int) duracionPartida.getValue()
+                ));
+
+                dispose(); // Cerrar VentanaPVP
             }
         });
 
-        // Agregar tiempo de partida y botones al panel inferior
-        bottomPanel.add(tiempoPanel, BorderLayout.NORTH);
-        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+        // Agregar componentes al panel translúcido
+        panelTranslucido.add(tiempoPanel, BorderLayout.NORTH); // Tiempo en la parte superior
+        panelTranslucido.add(playersPanel, BorderLayout.CENTER); // Jugadores en el centro
+        panelTranslucido.add(buttonPanel, BorderLayout.SOUTH); // Botones en la parte inferior
 
-        // Agregar los paneles al fondo
+        // Agregar el panel translúcido al fondo
         fondo.add(panelTranslucido, BorderLayout.CENTER);
-        fondo.add(bottomPanel, BorderLayout.SOUTH);
 
         setContentPane(fondo);
     }
@@ -117,7 +127,7 @@ public class VentanaPVP extends JFrame {
         configPanel.setOpaque(false);
 
         // Campo para el nombre del jugador
-        JLabel nombreLabel = new JLabel("Nombre del jugador:", JLabel.RIGHT);
+        JLabel nombreLabel = new JLabel("Player name:", JLabel.RIGHT);
         nombreLabel.setFont(new Font("Arial", Font.BOLD, 14));
         configPanel.add(nombreLabel);
         JTextField nombreJugador = new JTextField();
@@ -129,7 +139,7 @@ public class VentanaPVP extends JFrame {
         configPanel.add(nombreJugador);
 
         // Campo para soles o cerebros iniciales
-        JLabel recursosLabel = new JLabel(isPlant ? "Soles iniciales:" : "Cerebros iniciales:", JLabel.RIGHT);
+        JLabel recursosLabel = new JLabel(isPlant ? "Initial Suns:" : "Initial Brains:", JLabel.RIGHT);
         recursosLabel.setFont(new Font("Arial", Font.BOLD, 14));
         configPanel.add(recursosLabel);
         JSpinner recursosIniciales = new JSpinner(new SpinnerNumberModel(100, 50, 500, 10));
@@ -143,14 +153,31 @@ public class VentanaPVP extends JFrame {
         // Subpanel para la selección de plantas/zombies con imágenes
         JPanel selectionPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         selectionPanel.setOpaque(false);
-        String[] opciones = isPlant ? new String[]{"Girasol", "Lanzaguisantes", "Nuez", "Papa Explosiva", "ECIPlant"} : new String[]{"Zombie Básico", "Conehead", "Buckethead", "Brainstein", "ECIZombie"};
+        String[] opciones = isPlant ? new String[]{"Sunflower", "Peashooter", "Wall-nut", "Potato Mine", "ECIplant"} : new String[]{"Basic Zombie", "Conehead", "Buckethead", "Brainstein", "ECIZombie"};
         ArrayList<JButton> botones = isPlant ? botonesPlantas : botonesZombies;
         for (String opcion : opciones) {
             JButton boton = new JButton();
             try {
-                // Reemplaza "/ruta/a/imagen.png" con la imagen correspondiente
-                ImageIcon icono = new ImageIcon(getClass().getResource("/presentation/images/" + opcion.toLowerCase().replace(" ", "_") + ".png"));
-                Image imagenEscalada = icono.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                // Asignar imágenes específicas para cada opción
+                String rutaImagen = isPlant ?
+                        switch (opcion) {
+                            case "Sunflower" -> "/presentation/images/images_Plants/girasolcarta.png";
+                            case "Peashooter" -> "/presentation/images/images_Plants/tiracarta.png";
+                            case "Wall-nut" -> "/presentation/images/images_Plants/nuescarta.png";
+                            case "Potato Mine" -> "/presentation/images/images_Plants/pumcarta.png";
+                            case "ECIplant" -> "/presentation/images/images_Plants/ecicarta.png";
+                            default -> "/presentation/images/images_Plants/default.png";
+                        } :
+                        switch (opcion) {
+                            case "Basic Zombie" -> "/presentation/images/images_Zombies/basicocarta.png";
+                            case "Conehead" -> "/presentation/images/images_Zombies/conocarta.png";
+                            case "Buckethead" -> "/presentation/images/images_Zombies/cubetacarta.png";
+                            case "Brainstein" -> "/presentation/images/images_Zombies/cerebrocarta.png";
+                            case "ECIZombie" -> "/presentation/images/images_Zombies/bombacarta.png";
+                            default -> "/presentation/images/images_Zombies/default.png";
+                        };
+                ImageIcon icono = new ImageIcon(getClass().getResource(rutaImagen));
+                Image imagenEscalada = icono.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH); // Cambiar tamaño a 120x120
                 boton.setIcon(new ImageIcon(imagenEscalada));
             } catch (Exception e) {
                 boton.setText(opcion);
@@ -176,7 +203,7 @@ public class VentanaPVP extends JFrame {
         if (seleccionadas.contains(opcion)) {
             seleccionadas.remove(opcion);
             boton.setBackground(Color.WHITE);
-        } else if (seleccionadas.size() < 5) {
+        } else {
             seleccionadas.add(opcion);
             boton.setBackground(new Color(0, 255, 0, 128)); // Verde translúcido
         }
@@ -207,7 +234,7 @@ public class VentanaPVP extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            VentanaPVP ventanaPVP = new VentanaPVP(null);
+            VentanaPVP ventanaPVP = new VentanaPVP(null, null); // No detiene música en este caso
             ventanaPVP.setVisible(true);
         });
     }
