@@ -33,14 +33,14 @@ public class POOBvsZombiesGUI extends JFrame {
         menuItemExit.addActionListener(e -> confirmarSalida());
 
         // Configurar botones con imágenes
-        configureButtonWithImage(buttonPVSM, "/images/PVSM.png", 200, 250);
-        configureButtonWithImage(buttonMVSM, "/images/MvsM.png", 200, 250);
-        configureButtonWithImage(buttonPVP, "/images/PVP.png", 200, 250);
+        configureButtonWithImage(buttonPVSM, "/presentation/images/PVSM.png", 200, 250);
+        configureButtonWithImage(buttonMVSM, "/presentation/images/MvsM.png", 200, 250);
+        configureButtonWithImage(buttonPVP, "/presentation/images/PVP.png", 200, 250);
 
         // Añadir acciones a los botones
         buttonPVSM.addActionListener(e -> abrirVentanaPvsM());
         buttonMVSM.addActionListener(e -> JOptionPane.showMessageDialog(this, "Ventana MVSM aún no implementada"));
-        buttonPVP.addActionListener(e -> JOptionPane.showMessageDialog(this, "Ventana PVP aún no implementada"));
+        buttonPVP.addActionListener(e -> abrirVentanaPVP());
 
         // Añadir botones al panel
         fondo.setLayout(null);
@@ -68,6 +68,11 @@ public class POOBvsZombiesGUI extends JFrame {
     private void abrirVentanaPvsM() {
         VentanaPvsM ventanaPvsM = new VentanaPvsM(this);
         ventanaPvsM.setVisible(true);
+    }
+
+    private void abrirVentanaPVP() {
+        VentanaPVP ventanaPVP = new VentanaPVP(this);
+        ventanaPVP.setVisible(true);
     }
 
     private void confirmarSalida() {
@@ -120,7 +125,7 @@ public class POOBvsZombiesGUI extends JFrame {
         private Image imagen;
 
         public FondoPanel() {
-            this("/images/menu.png");
+            this("/presentation/images/menu.png");
         }
 
         public FondoPanel(String imagePath) {

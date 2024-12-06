@@ -70,11 +70,11 @@ public class VentanaJuego extends JFrame {
                 // Determinar la imagen según la posición
                 String imagePath;
                 if (col == 0) {
-                    imagePath = "/images/piso_casa.png";
+                    imagePath = "/presentation/images/piso_casa.png";
                 } else if (col == 9) {
-                    imagePath = "/images/padimento_zombies.png";
+                    imagePath = "/presentation/images/padimento_zombies.png";
                 } else {
-                    imagePath = "/images/pasto.png";
+                    imagePath = "/presentation/images/pasto.png";
                 }
 
                 // Asignar la imagen al botón

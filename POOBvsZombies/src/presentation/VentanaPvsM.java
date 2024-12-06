@@ -9,7 +9,7 @@ public class VentanaPvsM extends JFrame {
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        FondoPanel fondo = new FondoPanel("/images/ventana1.png");
+        FondoPanel fondo = new FondoPanel("/presentation/images/ventana1.png");
         setContentPane(fondo);
         setLayout(null);
 
