@@ -92,13 +92,15 @@ public class VentanaPVP extends JFrame {
                     stopMusicCallback.run();
                 }
 
-                // Abrir VentanaJuegoPVP
+                // Abrir VentanaJuegoPVP con las selecciones
                 SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
                         nombre1,
                         nombre2,
                         (int) solesIniciales.getValue(),
                         (int) cerebrosIniciales.getValue(),
-                        (int) duracionPartida.getValue()
+                        (int) duracionPartida.getValue(),
+                        plantasSeleccionadas,
+                        zombiesSeleccionados
                 ));
 
                 dispose(); // Cerrar VentanaPVP
@@ -117,16 +119,13 @@ public class VentanaPVP extends JFrame {
     }
 
     private JPanel createPlayerPanel(String title, boolean isPlant) {
-        // Panel principal para cada jugador
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2), title, 0, 0, new Font("Arial", Font.BOLD, 18), Color.BLACK));
 
-        // Subpanel para las configuraciones
-        JPanel configPanel = new JPanel(new GridLayout(3, 2, 10, 10)); // 3 filas, 2 columnas
+        JPanel configPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         configPanel.setOpaque(false);
 
-        // Campo para el nombre del jugador
         JLabel nombreLabel = new JLabel("Player name:", JLabel.RIGHT);
         nombreLabel.setFont(new Font("Arial", Font.BOLD, 14));
         configPanel.add(nombreLabel);
@@ -138,7 +137,6 @@ public class VentanaPVP extends JFrame {
         }
         configPanel.add(nombreJugador);
 
-        // Campo para soles o cerebros iniciales
         JLabel recursosLabel = new JLabel(isPlant ? "Initial Suns:" : "Initial Brains:", JLabel.RIGHT);
         recursosLabel.setFont(new Font("Arial", Font.BOLD, 14));
         configPanel.add(recursosLabel);
@@ -150,15 +148,15 @@ public class VentanaPVP extends JFrame {
         }
         configPanel.add(recursosIniciales);
 
-        // Subpanel para la selección de plantas/zombies con imágenes
         JPanel selectionPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         selectionPanel.setOpaque(false);
-        String[] opciones = isPlant ? new String[]{"Sunflower", "Peashooter", "Wall-nut", "Potato Mine", "ECIplant"} : new String[]{"Basic Zombie", "Conehead", "Buckethead", "Brainstein", "ECIZombie"};
+        String[] opciones = isPlant ? 
+            new String[]{"Sunflower", "Peashooter", "Wall-nut", "Potato Mine", "ECIplant"} :
+            new String[]{"Basic Zombie", "Conehead", "Buckethead", "Brainstein", "ECIZombie"};
         ArrayList<JButton> botones = isPlant ? botonesPlantas : botonesZombies;
         for (String opcion : opciones) {
             JButton boton = new JButton();
             try {
-                // Asignar imágenes específicas para cada opción
                 String rutaImagen = isPlant ?
                         switch (opcion) {
                             case "Sunflower" -> "/presentation/images/images_Plants/girasolcarta.png";
@@ -177,7 +175,7 @@ public class VentanaPVP extends JFrame {
                             default -> "/presentation/images/images_Zombies/default.png";
                         };
                 ImageIcon icono = new ImageIcon(getClass().getResource(rutaImagen));
-                Image imagenEscalada = icono.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH); // Cambiar tamaño a 120x120
+                Image imagenEscalada = icono.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
                 boton.setIcon(new ImageIcon(imagenEscalada));
             } catch (Exception e) {
                 boton.setText(opcion);
@@ -191,7 +189,6 @@ public class VentanaPVP extends JFrame {
             selectionPanel.add(boton);
         }
 
-        // Agregar subpaneles al panel principal
         panel.add(configPanel, BorderLayout.NORTH);
         panel.add(selectionPanel, BorderLayout.CENTER);
 
@@ -234,7 +231,7 @@ public class VentanaPVP extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            VentanaPVP ventanaPVP = new VentanaPVP(null, null); // No detiene música en este caso
+            VentanaPVP ventanaPVP = new VentanaPVP(null, null);
             ventanaPVP.setVisible(true);
         });
     }
