@@ -9,19 +9,78 @@ import java.io.IOException;
 
 public class POOBvsZombiesGUI extends JFrame {
 
-    FondoPanel fondo = new FondoPanel();
+    private FondoPanel fondo = new FondoPanel("/presentation/images/windows/menu.png");
     private Clip backgroundMusic;
 
-    // Declaración de botones
-    JButton buttonPVSM = new JButton();
-    JButton buttonMVSM = new JButton();
-    JButton buttonPVP = new JButton();
+    // Declaración de botones para la pantalla principal del juego
+    private JButton buttonPVSM = new JButton();
+    private JButton buttonMVSM = new JButton();
+    private JButton buttonPVP = new JButton();
 
     public POOBvsZombiesGUI() {
-        this.setContentPane(fondo);
-        setBounds(100, 100, 800, 600);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        // Configuración inicial de la ventana
         setTitle("POOBvsZombies");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Inicia maximizado
+        setLayout(new BorderLayout());
+
+        // Mostrar la pantalla de inicio
+        showSplashScreen();
+    }
+
+    /**
+     * Método para mostrar la pantalla de inicio.
+     */
+    private void showSplashScreen() {
+        // Crear un panel para la pantalla de inicio
+        JPanel splashPanel = new JPanel() {
+            private Image imagen;
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (imagen == null) {
+                    try {
+                        imagen = new ImageIcon(getClass().getResource("/presentation/images/windows/inicio.gif")).getImage();
+                    } catch (Exception e) {
+                        System.out.println("Error al cargar la imagen: " + e.getMessage());
+                    }
+                }
+                if (imagen != null) {
+                    g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
+        splashPanel.setLayout(new BorderLayout());
+
+        // Texto en amarillo
+        JLabel textLabel = new JLabel("Press anywhere to play", JLabel.CENTER);
+        textLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        textLabel.setForeground(Color.YELLOW);
+        splashPanel.add(textLabel, BorderLayout.SOUTH);
+
+        // Agregar el panel de inicio al JFrame
+        setContentPane(splashPanel);
+        revalidate();
+        repaint();
+
+        // Listener para detectar clics y cambiar a la pantalla principal del juego
+        splashPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showMainScreen(); // Cambiar a la pantalla principal del juego
+            }
+        });
+    }
+
+    /**
+     * Método para mostrar la pantalla principal del juego.
+     */
+    private void showMainScreen() {
+        // Configurar el fondo del JFrame para la pantalla principal
+        setContentPane(fondo);
+        revalidate();
+        repaint();
 
         // Iniciar música de fondo
         startBackgroundMusic("/presentation/songs/menu.wav");
@@ -49,7 +108,7 @@ public class POOBvsZombiesGUI extends JFrame {
         buttonMVSM.addActionListener(e -> JOptionPane.showMessageDialog(this, "MVSM window not yet implemented"));
         buttonPVP.addActionListener(e -> openPVPWindow());
 
-        // Añadir botones al panel
+        // Añadir botones al panel principal
         fondo.setLayout(null);
         fondo.add(buttonPVSM);
         fondo.add(buttonMVSM);
@@ -151,10 +210,6 @@ public class POOBvsZombiesGUI extends JFrame {
      */
     class FondoPanel extends JPanel {
         private Image imagen;
-
-        public FondoPanel() {
-            this("/presentation/images/windows/menu.png");
-        }
 
         public FondoPanel(String imagePath) {
             try {
