@@ -12,34 +12,20 @@ public class VentanaJuegoPVP extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Almacenar soles y cerebros iniciales, pero no mostrarlos por ahora
-        int inicialesPlantas = solesIniciales;
-        int inicialesZombies = cerebrosIniciales;
+        int iconSize = 80; // Tamaño específico para las imágenes
 
         // Crear barra de menús
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        JMenu menuArchivo = new JMenu("Archivo");
+        JMenu menuArchivo = new JMenu("File");
         menuBar.add(menuArchivo);
 
-        JMenuItem menuItemNew = new JMenuItem("Nuevo");
-        JMenuItem menuItemOpen = new JMenuItem("Abrir");
-        JMenuItem menuItemSave = new JMenuItem("Salvar");
-        JMenuItem menuItemImport = new JMenuItem("Importar");
-        JMenuItem menuItemExport = new JMenuItem("Exportar");
-        JMenuItem menuItemExit = new JMenuItem("Salir");
-
-        menuArchivo.add(menuItemNew);
-        menuArchivo.add(menuItemOpen);
-        menuArchivo.add(menuItemSave);
-        menuArchivo.add(menuItemImport);
-        menuArchivo.add(menuItemExport);
-        menuArchivo.addSeparator();
+        JMenuItem menuItemExit = new JMenuItem("Exit");
         menuArchivo.add(menuItemExit);
 
         menuItemExit.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea salir?", "Confirmar salida",
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Confirm Exit",
                     JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 dispose();
@@ -54,22 +40,32 @@ public class VentanaJuegoPVP extends JFrame {
         JPanel panelNorte = new JPanel(new GridLayout(1, 14));
         panelNorte.setPreferredSize(new Dimension(0, 100));
 
-        // Info 1: Nombre del jugador de las plantas convertido en botón
-        JButton botonJugadorPlantas = new JButton("Jugador 1: " + nombreJugador1);
-        botonJugadorPlantas.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panelNorte.add(botonJugadorPlantas);
+        // Info 1: Jugador 1 con imagen y contador
+        JPanel panelJugador1 = createPlayerPanel(nombreJugador1, "/presentation/images/images_Plants/sol.png", solesIniciales, iconSize);
+        panelNorte.add(panelJugador1);
 
-        // Info 2 a Info 13 como botones
-        for (int i = 2; i <= 13; i++) {
-            JButton botonInfo = new JButton("Info " + i);
-            botonInfo.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            panelNorte.add(botonInfo);
+        // Infos 2 a 6: Botones con imagen de maseta y fondo marrón
+        for (int i = 2; i <= 6; i++) {
+            JButton boton = createButtonWithImage("/presentation/images/images_Plants/maseta.png", new Color(139, 69, 19), iconSize);
+            panelNorte.add(boton);
         }
 
-        // Info 14: Nombre del jugador de los zombies convertido en botón
-        JButton botonJugadorZombies = new JButton("Jugador 2: " + nombreJugador2);
-        botonJugadorZombies.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panelNorte.add(botonJugadorZombies);
+        // Infos 7 y 8: Botones normales
+        for (int i = 7; i <= 8; i++) {
+            JButton boton = new JButton("Info " + i);
+            boton.setBackground(Color.LIGHT_GRAY);
+            panelNorte.add(boton);
+        }
+
+        // Infos 9 a 13: Botones con imagen de entrada y fondo azul
+        for (int i = 9; i <= 13; i++) {
+            JButton boton = createButtonWithImage("/presentation/images/images_Zombies/entrada.png", new Color(70, 130, 180), iconSize);
+            panelNorte.add(boton);
+        }
+
+        // Info 14: Jugador 2 con imagen y contador
+        JPanel panelJugador2 = createPlayerPanel(nombreJugador2, "/presentation/images/images_Zombies/cerebro.png", cerebrosIniciales, iconSize);
+        panelNorte.add(panelJugador2);
 
         panelPrincipal.add(panelNorte, BorderLayout.NORTH);
 
@@ -98,16 +94,8 @@ public class VentanaJuegoPVP extends JFrame {
                 // Asignar la imagen al botón
                 try {
                     ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
-                    boton.addComponentListener(new ComponentAdapter() {
-                        @Override
-                        public void componentResized(ComponentEvent e) {
-                            if (boton.getWidth() > 0 && boton.getHeight() > 0) {
-                                Image scaledImage = icon.getImage().getScaledInstance(boton.getWidth(), boton.getHeight(),
-                                        Image.SCALE_SMOOTH);
-                                boton.setIcon(new ImageIcon(scaledImage));
-                            }
-                        }
-                    });
+                    Image scaledImage = icon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+                    boton.setIcon(new ImageIcon(scaledImage));
                 } catch (Exception e) {
                     System.out.println("No se pudo cargar la imagen para el botón: " + e.getMessage());
                 }
@@ -121,20 +109,18 @@ public class VentanaJuegoPVP extends JFrame {
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setPreferredSize(new Dimension(0, 100));
 
-        // Botón de Menú y "Info 15" como botones del mismo tamaño
-        JPanel panelMenu = new JPanel(new GridLayout(1, 2));
-        JButton botonMenu = new JButton("Menú");
-        JButton botonInfo15 = new JButton("Info 15");
-        botonMenu.setPreferredSize(new Dimension(0, 100));
-        botonInfo15.setPreferredSize(new Dimension(0, 100));
-        panelMenu.add(botonMenu);
-        panelMenu.add(botonInfo15);
-        panelSur.add(panelMenu, BorderLayout.WEST);
+        // Info 15 con imagen de pala
+        JButton info15 = createButtonWithImage("/presentation/images/images_Plants/pala.png", Color.WHITE, iconSize);
+        panelSur.add(info15, BorderLayout.WEST);
+
+        // Menú con imagen
+        JButton menuButton = createButtonWithImage("/presentation/images/windows/menujuego.png", Color.WHITE, iconSize);
+        panelSur.add(menuButton, BorderLayout.EAST);
 
         // Información en el centro del panel inferior
         JPanel panelInfoSur = new JPanel(new GridLayout(2, 1));
-        JLabel labelDuracion = new JLabel("Duración: " + duracionPartida + " minutos", SwingConstants.CENTER);
-        JLabel labelTemporizador = new JLabel("Tiempo restante: Calculando...", SwingConstants.CENTER);
+        JLabel labelDuracion = new JLabel("Duration: " + duracionPartida + " minutes", SwingConstants.CENTER);
+        JLabel labelTemporizador = new JLabel("Time left: Calculating...", SwingConstants.CENTER);
         panelInfoSur.add(labelDuracion);
         panelInfoSur.add(labelTemporizador);
         panelSur.add(panelInfoSur, BorderLayout.CENTER);
@@ -148,18 +134,75 @@ public class VentanaJuegoPVP extends JFrame {
                 while (tiempoRestanteSegundos > 0) {
                     int minutos = tiempoRestanteSegundos / 60;
                     int segundos = tiempoRestanteSegundos % 60;
-                    labelTemporizador.setText("Tiempo restante: " + minutos + ":" + String.format("%02d", segundos));
+                    labelTemporizador.setText("Time left: " + minutos + ":" + String.format("%02d", segundos));
                     Thread.sleep(1000);
                     tiempoRestanteSegundos--;
                 }
-                JOptionPane.showMessageDialog(this, "¡Tiempo agotado!");
+                JOptionPane.showMessageDialog(this, "Time is up!");
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         }).start();
 
-        botonMenu.addActionListener(e -> dispose());
+        menuButton.addActionListener(e -> dispose());
 
         setVisible(true);
+    }
+
+    private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        JLabel nameLabel = new JLabel(playerName, SwingConstants.CENTER);
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        panel.add(nameLabel, BorderLayout.NORTH);
+
+        JLabel imageLabel = new JLabel();
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
+            Image scaledImage = icon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(scaledImage));
+        } catch (Exception e) {
+            System.out.println("Image not found: " + e.getMessage());
+        }
+        panel.add(imageLabel, BorderLayout.CENTER);
+
+        JLabel counterLabel = new JLabel(String.valueOf(initialCount), SwingConstants.CENTER);
+        counterLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        panel.add(counterLabel, BorderLayout.SOUTH);
+
+        // Increment the counter based on the resource type
+        new Thread(() -> {
+            try {
+                while (true) {
+                    int increment = imagePath.contains("sol") ? 25 : 50;
+                    int currentValue = Integer.parseInt(counterLabel.getText());
+                    counterLabel.setText(String.valueOf(currentValue + increment));
+                    Thread.sleep(10000);
+                }
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
+
+        return panel;
+    }
+
+    private JButton createButtonWithImage(String imagePath, Color background, int iconSize) {
+        JButton button = new JButton();
+        button.setBackground(background);
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
+            Image scaledImage = icon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
+            button.setIcon(new ImageIcon(scaledImage));
+        } catch (Exception e) {
+            System.out.println("Image not found: " + e.getMessage());
+        }
+        return button;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new VentanaJuegoPVP("Player 1", "Player 2", 200, 300, 5));
     }
 }
