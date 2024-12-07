@@ -2,7 +2,6 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
@@ -59,12 +58,20 @@ public class VentanaJuegoPVP extends JFrame {
             }
         });
 
-        // Panel principal
-        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        // Panel principal con imagen de fondo
+        JPanel panelPrincipal = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon fondo = new ImageIcon(getClass().getResource("/presentation/images/windows/fondojuego.jpg"));
+                g.drawImage(fondo.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
         setContentPane(panelPrincipal);
 
         // Panel superior (NORTE)
         JPanel panelNorte = new JPanel(new GridLayout(1, 14));
+        panelNorte.setOpaque(false); // Fondo transparente
         panelNorte.setPreferredSize(new Dimension(0, 150)); // Ajustamos altura
 
         // Info 1: Jugador 1 con imagen y contador
@@ -88,7 +95,7 @@ public class VentanaJuegoPVP extends JFrame {
                 "/presentation/images/images_Plants/puntos.png",
                 String.valueOf(puntosSoles), // Inicializado en 0
                 150,
-                new Color(0, 128, 0) // Fondo verde
+                new Color(0, 0, 0, 128) // Fondo 
         );
         panelNorte.add(puntosSolesLabel);
 
@@ -97,7 +104,7 @@ public class VentanaJuegoPVP extends JFrame {
                 "/presentation/images/images_Zombies/puntoszombies.png",
                 String.valueOf(puntosCerebros), // Inicializado en 0
                 150,
-                new Color(0, 128, 0) // Fondo verde
+                new Color(0, 0, 0, 128) // Fondo 
         );
         panelNorte.add(puntosCerebrosLabel);
 
@@ -120,17 +127,11 @@ public class VentanaJuegoPVP extends JFrame {
 
         // Panel central (CENTRO)
         JPanel panelCentro = new JPanel(new GridLayout(5, 10));
+        panelCentro.setOpaque(false); // Fondo transparente
         JButton[][] botones = new JButton[5][10];
 
         for (int fila = 0; fila < 5; fila++) {
             for (int col = 0; col < 10; col++) {
-                JButton boton = new JButton();
-                boton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                boton.setBackground(new Color(0, 100, 0)); // Verde oscuro
-                boton.setOpaque(true);
-                botones[fila][col] = boton;
-
-                // Determinar la imagen según la posición
                 String imagePath;
                 if (col == 0) {
                     imagePath = "/presentation/images/images_Plants/pisocasa.png";
@@ -140,7 +141,8 @@ public class VentanaJuegoPVP extends JFrame {
                     imagePath = "/presentation/images/images_Plants/pasto.png";
                 }
 
-                boton = createButtonWithDynamicImage(imagePath, new Color(0, 100, 0));
+                JButton boton = createButtonWithDynamicImage(imagePath, new Color(0, 100, 0));
+                botones[fila][col] = boton;
                 panelCentro.add(boton);
             }
         }
@@ -148,48 +150,38 @@ public class VentanaJuegoPVP extends JFrame {
 
         // Panel inferior (SUR)
         JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur.setOpaque(false);
         panelSur.setPreferredSize(new Dimension(0, 120));
 
-        // Info 15 con imagen de pala (tamaño fijo más grande y fondo café)
         JButton info15 = createButtonWithFixedImage("/presentation/images/images_Plants/pala.png", new Color(139, 69, 19), 100);
         panelSur.add(info15, BorderLayout.WEST);
 
-        // Menú con imagen y fondo beige
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
         panelSur.add(menuButton, BorderLayout.EAST);
 
-        // Información en el centro del panel inferior
         JPanel panelInfoSur = new JPanel(new GridLayout(2, 1));
+        panelInfoSur.setOpaque(false);
+
         JLabel labelDuracion = new JLabel("Duration: " + duracionPartida + " minutes", SwingConstants.CENTER);
+        labelDuracion.setFont(new Font("Arial", Font.BOLD, 16));
+        labelDuracion.setForeground(Color.WHITE);
+
         labelTemporizador = new JLabel("Time left: " + formatTime(tiempoRestante), SwingConstants.CENTER);
+        labelTemporizador.setOpaque(false); // Eliminamos el fondo para que sea transparente
+        labelTemporizador.setForeground(Color.WHITE); // Letras blancas
+        labelTemporizador.setFont(new Font("Arial", Font.BOLD, 48)); // Letras más grandes
+
         panelInfoSur.add(labelDuracion);
         panelInfoSur.add(labelTemporizador);
         panelSur.add(panelInfoSur, BorderLayout.CENTER);
 
         panelPrincipal.add(panelSur, BorderLayout.SOUTH);
 
-        // Inicia los temporizadores
         startTimer();
         startSolesJugador1Timer();
         startCerebrosJugador2Timer();
 
         setVisible(true);
-    }
-
-    private void startSolesJugador1Timer() {
-        timerSolesJugador1 = new Timer(10000, e -> {
-            contadorSolesJugador1 += 25; // Incrementa 25 soles
-            contadorSolesJugador1Label.setText(String.valueOf(contadorSolesJugador1)); // Actualiza el texto
-        });
-        timerSolesJugador1.start();
-    }
-
-    private void startCerebrosJugador2Timer() {
-        timerCerebrosJugador2 = new Timer(10000, e -> {
-            contadorCerebrosJugador2 += 50; // Incrementa 50 cerebros
-            contadorCerebrosJugador2Label.setText(String.valueOf(contadorCerebrosJugador2)); // Actualiza el texto
-        });
-        timerCerebrosJugador2.start();
     }
 
     private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor) {
@@ -290,6 +282,22 @@ public class VentanaJuegoPVP extends JFrame {
             }
         });
         timer.start();
+    }
+
+    private void startSolesJugador1Timer() {
+        timerSolesJugador1 = new Timer(10000, e -> {
+            contadorSolesJugador1 += 25;
+            contadorSolesJugador1Label.setText(String.valueOf(contadorSolesJugador1));
+        });
+        timerSolesJugador1.start();
+    }
+
+    private void startCerebrosJugador2Timer() {
+        timerCerebrosJugador2 = new Timer(10000, e -> {
+            contadorCerebrosJugador2 += 50;
+            contadorCerebrosJugador2Label.setText(String.valueOf(contadorCerebrosJugador2));
+        });
+        timerCerebrosJugador2.start();
     }
 
     public static void main(String[] args) {
