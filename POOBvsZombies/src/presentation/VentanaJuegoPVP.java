@@ -23,6 +23,7 @@ public class VentanaJuegoPVP extends JFrame {
     private JButton[][] botones; // Matriz de botones para el tablero
     private Board board; // Tablero lógico
     private Element selectedPlant = null; // Planta seleccionada para colocar
+    private boolean removeMode = false; // Indica si estamos en modo "quitar planta"
 
     public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<Element> plantasSeleccionadas, List<Element> zombiesSeleccionados) {
         super("POOBvsZombies - Player vs Player");
@@ -144,6 +145,7 @@ public class VentanaJuegoPVP extends JFrame {
         panelSur.setPreferredSize(new Dimension(0, 120));
 
         JButton info15 = createButtonWithFixedImage("/presentation/images/images_Plants/pala.png", new Color(139, 69, 19), 100);
+        info15.addActionListener(e -> removeMode = true); // Activar modo "quitar planta"
         panelSur.add(info15, BorderLayout.WEST);
 
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
@@ -171,6 +173,23 @@ public class VentanaJuegoPVP extends JFrame {
     }
 
     private void placePlantOnBoard(int fila, int col) {
+        // Modo "quitar planta"
+        if (removeMode) {
+            if (!board.isCellEmpty(fila, col)) {
+                board.setCellContent(fila, col, null); // Eliminar contenido lógico
+                botones[fila][col].removeAll(); // Limpiar el botón visualmente
+                botones[fila][col].revalidate();
+                botones[fila][col].repaint();
+            }
+            removeMode = false; // Salir del modo "quitar planta" después del clic
+            return;
+        }
+
+        // Restricción para la primera y última columna
+        if (col == 0 || col == 9) {
+            return; // Salir del método sin realizar ninguna acción
+        }
+
         if (selectedPlant != null && board.isCellEmpty(fila, col)) {
             board.setCellContent(fila, col, selectedPlant.getName());
 
@@ -182,13 +201,12 @@ public class VentanaJuegoPVP extends JFrame {
                 gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 gifLabel.setVerticalAlignment(SwingConstants.CENTER);
 
-                // Redimensionar el GIF al 75% de su tamaño original
+                // Redimensionar el GIF al 75% del tamaño de la celda
                 int cellWidth = botones[fila][col].getWidth();
                 int cellHeight = botones[fila][col].getHeight();
                 int newWidth = (int) (cellWidth * 0.75); // 75% del ancho
                 int newHeight = (int) (cellHeight * 0.75); // 75% del alto
 
-                // Redimensionar el GIF y agregarlo al botón
                 Image resizedGif = plantIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
                 gifLabel.setIcon(new ImageIcon(resizedGif));
 
@@ -200,7 +218,6 @@ public class VentanaJuegoPVP extends JFrame {
             }
         }
     }
-
 
     private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor, JLabel[] counterLabel) {
         JPanel panel = new JPanel(new BorderLayout());
