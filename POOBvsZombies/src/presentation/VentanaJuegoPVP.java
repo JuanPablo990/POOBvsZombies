@@ -176,17 +176,22 @@ public class VentanaJuegoPVP extends JFrame {
         if (selectedPlant != null && board.isCellEmpty(fila, col)) {
             board.setCellContent(fila, col, selectedPlant.getName());
 
-            // Escalar la imagen de la planta y centrarla
+            // Asignar GIF animado y redimensionarlo
             try {
                 ImageIcon plantIcon = new ImageIcon(getClass().getResource(selectedPlant.getBoardImagePath()));
-                Image scaledImage = plantIcon.getImage().getScaledInstance(
-                        botones[fila][col].getWidth() / 2,  // La mitad del ancho del botón
-                        botones[fila][col].getHeight() / 2, // La mitad de la altura del botón
-                        Image.SCALE_SMOOTH
-                );
+                Image gifImage = plantIcon.getImage();
 
-                // Asignar el icono escalado
-                botones[fila][col].setIcon(new ImageIcon(scaledImage));
+                // Calcular nuevo tamaño (50% del tamaño de la celda)
+                int cellWidth = botones[fila][col].getWidth();
+                int cellHeight = botones[fila][col].getHeight();
+                int newWidth = (int) (cellWidth * 0.5); // 50% del ancho
+                int newHeight = (int) (cellHeight * 0.5); // 50% del alto
+
+                // Redimensionar el GIF
+                Image resizedGif = gifImage.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+
+                // Asignar el GIF redimensionado al botón
+                botones[fila][col].setIcon(new ImageIcon(resizedGif));
                 botones[fila][col].setHorizontalAlignment(SwingConstants.CENTER);
                 botones[fila][col].setVerticalAlignment(SwingConstants.CENTER);
             } catch (Exception e) {
@@ -194,6 +199,7 @@ public class VentanaJuegoPVP extends JFrame {
             }
         }
     }
+
 
     private void stopTimers() {
         if (timer != null) timer.stop();
@@ -303,19 +309,19 @@ public class VentanaJuegoPVP extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 List<Element> plantasSeleccionadas = Arrays.asList(
-                        new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.png"),
-                        new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.png"),
-                        new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.png"),
-                        new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.png"),
-                        new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.png")
+                        new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.gif"),
+                        new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.gif"),
+                        new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.gif"),
+                        new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.gif"),
+                        new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.gif")
                 );
 
                 List<Element> zombiesSeleccionados = Arrays.asList(
-                        new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.png"),
-                        new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/conehead1.png"),
-                        new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.png"),
-                        new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brainstein1.png"),
-                        new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.png")
+                        new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.gif"),
+                        new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/conehead1.gif"),
+                        new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.gif"),
+                        new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brainstein1.gif"),
+                        new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.gif")
                 );
 
                 new VentanaJuegoPVP("Player 1", "Player 2", 200, 300, 5, plantasSeleccionadas, zombiesSeleccionados);

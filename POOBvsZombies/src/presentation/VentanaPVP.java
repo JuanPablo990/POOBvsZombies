@@ -161,21 +161,21 @@ public class VentanaPVP extends JFrame {
 
     private List<Element> getPlantasDisponibles() {
         return List.of(
-            new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.png"),
-            new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.png"),
-            new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.png"),
-            new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.png"),
-            new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.png")
+            new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.gif"),
+            new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.gif"),
+            new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.gif"),
+            new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.gif"),
+            new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.gif")
         );
     }
 
     private List<Element> getZombiesDisponibles() {
         return List.of(
-            new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.png"),
-            new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/cone1.png"),
-            new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.png"),
-            new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brain1.png"),
-            new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.png")
+            new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.gif"),
+            new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/cone1.gif"),
+            new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.gif"),
+            new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brain1.gif"),
+            new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.gif")
         );
     }
 
