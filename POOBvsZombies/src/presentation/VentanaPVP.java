@@ -16,22 +16,19 @@ public class VentanaPVP extends JFrame {
     private ArrayList<Element> plantasSeleccionadas = new ArrayList<>();
     private ArrayList<Element> zombiesSeleccionados = new ArrayList<>();
 
-    private Runnable stopMusicCallback; // Callback para detener la música
+    private Runnable stopMusicCallback;
 
     public VentanaPVP(JFrame parent, Runnable stopMusicCallback) {
         this.stopMusicCallback = stopMusicCallback;
 
-        // Configuración de la ventana
         setTitle("Player vs Player");
         setSize(900, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(parent);
 
-        // Fondo personalizado con la imagen
         FondoPanel fondo = new FondoPanel("/presentation/images/windows/ventanapvp.png");
         fondo.setLayout(new BorderLayout());
 
-        // Panel translúcido para toda la información
         JPanel panelTranslucido = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -45,7 +42,6 @@ public class VentanaPVP extends JFrame {
         panelTranslucido.setOpaque(false);
         panelTranslucido.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Tiempo de partida en la parte superior
         JPanel tiempoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         tiempoPanel.setOpaque(false);
         JLabel tiempoLabel = new JLabel("Match Duration (min):");
@@ -54,7 +50,6 @@ public class VentanaPVP extends JFrame {
         tiempoPanel.add(tiempoLabel);
         tiempoPanel.add(duracionPartida);
 
-        // Panel para Player 1 (Plants) y Player 2 (Zombies)
         JPanel panelPlayerPlants = createPlayerPanel("Player 1 (Plants):", true);
         JPanel panelPlayerZombies = createPlayerPanel("Player 2 (Zombies):", false);
 
@@ -63,7 +58,6 @@ public class VentanaPVP extends JFrame {
         playersPanel.add(panelPlayerPlants);
         playersPanel.add(panelPlayerZombies);
 
-        // Botones para iniciar o volver
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setOpaque(false);
         JButton iniciarPartida = new JButton("Start Game");
@@ -133,7 +127,6 @@ public class VentanaPVP extends JFrame {
         try {
             ImageIcon icono = new ImageIcon(getClass().getResource(elemento.getImagePath()));
 
-            // Ajustar imagen al tamaño del botón dinámicamente
             boton.addComponentListener(new java.awt.event.ComponentAdapter() {
                 @Override
                 public void componentResized(java.awt.event.ComponentEvent e) {
@@ -156,35 +149,33 @@ public class VentanaPVP extends JFrame {
     private void toggleSelection(JButton boton, Element elemento, boolean isPlant) {
         List<Element> seleccionados = isPlant ? plantasSeleccionadas : zombiesSeleccionados;
         if (seleccionados.contains(elemento)) {
-            // Deseleccionar
             seleccionados.remove(elemento);
             boton.setBackground(null);
             boton.setOpaque(false);
         } else {
-            // Seleccionar
             seleccionados.add(elemento);
-            boton.setBackground(new Color(0, 255, 0, 128)); // Verde translúcido
+            boton.setBackground(new Color(0, 255, 0, 128));
             boton.setOpaque(true);
         }
     }
 
     private List<Element> getPlantasDisponibles() {
         return List.of(
-                new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png"),
-                new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png"),
-                new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png"),
-                new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png"),
-                new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png")
+            new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.png"),
+            new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.png"),
+            new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.png"),
+            new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.png"),
+            new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.png")
         );
     }
 
     private List<Element> getZombiesDisponibles() {
         return List.of(
-                new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png"),
-                new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png"),
-                new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png"),
-                new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png"),
-                new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png")
+            new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.png"),
+            new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/cone1.png"),
+            new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.png"),
+            new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brain1.png"),
+            new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.png")
         );
     }
 
@@ -204,13 +195,13 @@ public class VentanaPVP extends JFrame {
         }
 
         SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
-                nombreJugador1.getText(),
-                nombreJugador2.getText(),
-                (int) solesIniciales.getValue(),
-                (int) cerebrosIniciales.getValue(),
-                (int) duracionPartida.getValue(),
-                plantasSeleccionadas,
-                zombiesSeleccionados
+            nombreJugador1.getText(),
+            nombreJugador2.getText(),
+            (int) solesIniciales.getValue(),
+            (int) cerebrosIniciales.getValue(),
+            (int) duracionPartida.getValue(),
+            plantasSeleccionadas,
+            zombiesSeleccionados
         ));
         dispose();
     }

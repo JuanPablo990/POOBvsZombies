@@ -175,7 +175,23 @@ public class VentanaJuegoPVP extends JFrame {
     private void placePlantOnBoard(int fila, int col) {
         if (selectedPlant != null && board.isCellEmpty(fila, col)) {
             board.setCellContent(fila, col, selectedPlant.getName());
-            botones[fila][col].setIcon(new ImageIcon(getClass().getResource(selectedPlant.getBoardImagePath())));
+
+            // Escalar la imagen de la planta y centrarla
+            try {
+                ImageIcon plantIcon = new ImageIcon(getClass().getResource(selectedPlant.getBoardImagePath()));
+                Image scaledImage = plantIcon.getImage().getScaledInstance(
+                        botones[fila][col].getWidth() / 2,  // La mitad del ancho del botón
+                        botones[fila][col].getHeight() / 2, // La mitad de la altura del botón
+                        Image.SCALE_SMOOTH
+                );
+
+                // Asignar el icono escalado
+                botones[fila][col].setIcon(new ImageIcon(scaledImage));
+                botones[fila][col].setHorizontalAlignment(SwingConstants.CENTER);
+                botones[fila][col].setVerticalAlignment(SwingConstants.CENTER);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
