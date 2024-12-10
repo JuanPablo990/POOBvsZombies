@@ -23,7 +23,8 @@ public class VentanaJuegoPVP extends JFrame {
     private JButton[][] botones; // Matriz de botones para el tablero
     private Board board; // Tablero lógico
     private Element selectedPlant = null; // Planta seleccionada para colocar
-    private boolean removeMode = false; // Indica si estamos en modo "quitar planta"
+    private Element selectedZombie = null; // Zombie seleccionado para colocar
+    private boolean removeMode = false; // Indica si estamos en modo "quitar elemento"
 
     public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<Element> plantasSeleccionadas, List<Element> zombiesSeleccionados) {
         super("POOBvsZombies - Player vs Player");
@@ -82,7 +83,10 @@ public class VentanaJuegoPVP extends JFrame {
         // Infos 2 a 6: Plantas seleccionadas
         for (Element planta : plantasSeleccionadas) {
             JButton boton = createButtonWithDynamicImage(planta.getImagePath(), new Color(205, 133, 63));
-            boton.addActionListener(e -> selectedPlant = planta);
+            boton.addActionListener(e -> {
+                selectedPlant = planta;
+                selectedZombie = null; // Desactivar selección de zombie
+            });
             panelNorte.add(boton);
         }
 
@@ -103,6 +107,10 @@ public class VentanaJuegoPVP extends JFrame {
         // Infos 9 a 13: Zombies seleccionados
         for (Element zombie : zombiesSeleccionados) {
             JButton boton = createButtonWithDynamicImage(zombie.getImagePath(), new Color(70, 130, 180));
+            boton.addActionListener(e -> {
+                selectedZombie = zombie;
+                selectedPlant = null; // Desactivar selección de planta
+            });
             panelNorte.add(boton);
         }
 
@@ -133,7 +141,7 @@ public class VentanaJuegoPVP extends JFrame {
                 botones[fila][col] = boton;
 
                 final int f = fila, c = col;
-                boton.addActionListener(e -> placePlantOnBoard(f, c));
+                boton.addActionListener(e -> placeElementOnBoard(f, c));
                 panelCentro.add(boton);
             }
         }
@@ -145,7 +153,7 @@ public class VentanaJuegoPVP extends JFrame {
         panelSur.setPreferredSize(new Dimension(0, 120));
 
         JButton info15 = createButtonWithFixedImage("/presentation/images/images_Plants/pala.png", new Color(139, 69, 19), 100);
-        info15.addActionListener(e -> removeMode = true); // Activar modo "quitar planta"
+        info15.addActionListener(e -> removeMode = true); // Activar modo "quitar elemento"
         panelSur.add(info15, BorderLayout.WEST);
 
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
@@ -172,8 +180,8 @@ public class VentanaJuegoPVP extends JFrame {
         setVisible(true);
     }
 
-    private void placePlantOnBoard(int fila, int col) {
-        // Modo "quitar planta"
+    private void placeElementOnBoard(int fila, int col) {
+        // Modo "quitar elemento"
         if (removeMode) {
             if (!board.isCellEmpty(fila, col)) {
                 board.setCellContent(fila, col, null); // Eliminar contenido lógico
@@ -181,23 +189,21 @@ public class VentanaJuegoPVP extends JFrame {
                 botones[fila][col].revalidate();
                 botones[fila][col].repaint();
             }
-            removeMode = false; // Salir del modo "quitar planta" después del clic
+            removeMode = false; // Salir del modo "quitar elemento" después del clic
             return;
         }
 
-        // Restricción para la primera y última columna
-        if (col == 0 || col == 9) {
-            return; // Salir del método sin realizar ninguna acción
-        }
+        // Colocar una planta o zombie dependiendo de la selección
+        Element selectedElement = (selectedPlant != null) ? selectedPlant : selectedZombie;
 
-        if (selectedPlant != null && board.isCellEmpty(fila, col)) {
-            board.setCellContent(fila, col, selectedPlant.getName());
+        if (selectedElement != null && board.isCellEmpty(fila, col)) {
+            board.setCellContent(fila, col, selectedElement.getName());
 
             // Agregar GIF al botón sin reemplazar el fondo
             try {
-                ImageIcon plantIcon = new ImageIcon(getClass().getResource(selectedPlant.getBoardImagePath()));
+                ImageIcon elementIcon = new ImageIcon(getClass().getResource(selectedElement.getBoardImagePath()));
                 botones[fila][col].setLayout(new BorderLayout());
-                JLabel gifLabel = new JLabel(plantIcon);
+                JLabel gifLabel = new JLabel(elementIcon);
                 gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 gifLabel.setVerticalAlignment(SwingConstants.CENTER);
 
@@ -207,7 +213,7 @@ public class VentanaJuegoPVP extends JFrame {
                 int newWidth = (int) (cellWidth * 0.75); // 75% del ancho
                 int newHeight = (int) (cellHeight * 0.75); // 75% del alto
 
-                Image resizedGif = plantIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+                Image resizedGif = elementIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
                 gifLabel.setIcon(new ImageIcon(resizedGif));
 
                 botones[fila][col].add(gifLabel, BorderLayout.CENTER);
