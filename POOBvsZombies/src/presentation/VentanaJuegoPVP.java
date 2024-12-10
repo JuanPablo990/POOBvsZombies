@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Arrays;
 import java.util.List;
 
 public class VentanaJuegoPVP extends JFrame {
@@ -21,8 +22,11 @@ public class VentanaJuegoPVP extends JFrame {
     private Timer timer; // Temporizador para cuenta regresiva
     private Timer timerSolesJugador1; // Temporizador para sumar soles a Info 1
     private Timer timerCerebrosJugador2; // Temporizador para sumar cerebros a Info 14
+    private JButton[][] botones;
+    private Board board; // Tablero lógico
+    private Element selectedPlant = null; // Planta seleccionada para colocar
 
-    public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<String> plantasSeleccionadas, List<String> zombiesSeleccionados) {
+    public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<Element> plantasSeleccionadas, List<Element> zombiesSeleccionados) {
         super("POOBvsZombies - Player vs Player");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -31,6 +35,7 @@ public class VentanaJuegoPVP extends JFrame {
         tiempoRestante = duracionPartida * 60; // Convertimos duración en minutos a segundos
         contadorSolesJugador1 = solesIniciales;
         contadorCerebrosJugador2 = cerebrosIniciales;
+        board = new Board(5, 10); // Inicializamos el tablero lógico
 
         // Crear barra de menús
         JMenuBar menuBar = new JMenuBar();
@@ -68,25 +73,17 @@ public class VentanaJuegoPVP extends JFrame {
         panelNorte.setPreferredSize(new Dimension(0, 150));
 
         // Info 1: Jugador 1 con imagen y contador
+        JLabel[] contadorSolesLabelRef = new JLabel[1];
         JPanel panelJugador1 = createPlayerPanel(
-                nombreJugador1, "/presentation/images/images_Plants/sol.png", contadorSolesJugador1, 80, new Color(245, 245, 220)
+                nombreJugador1, "/presentation/images/images_Plants/sol.png", contadorSolesJugador1, 80, new Color(245, 245, 220), contadorSolesLabelRef
         );
+        contadorSolesJugador1Label = contadorSolesLabelRef[0];
         panelNorte.add(panelJugador1);
 
-        contadorSolesJugador1Label = (JLabel) panelJugador1.getComponent(2);
-
-        // Infos 2 a 6: Plantas seleccionadas en `VentanaPVP`
-        for (int i = 0; i < 5; i++) {
-            String plantaSeleccionada = i < plantasSeleccionadas.size() ? plantasSeleccionadas.get(i) : null;
-            String rutaImagen = plantaSeleccionada != null ? switch (plantaSeleccionada) {
-                case "Sunflower" -> "/presentation/images/images_Plants/girasolcarta.png";
-                case "Peashooter" -> "/presentation/images/images_Plants/tiracarta.png";
-                case "Wall-nut" -> "/presentation/images/images_Plants/nuescarta.png";
-                case "Potato Mine" -> "/presentation/images/images_Plants/pumcarta.png";
-                case "ECIplant" -> "/presentation/images/images_Plants/ecicarta.png";
-                default -> null;
-            } : "/presentation/images/images_Plants/slot.png";
-            JButton boton = createButtonWithDynamicImage(rutaImagen, new Color(205, 133, 63));
+        // Infos 2 a 6: Plantas seleccionadas
+        for (Element planta : plantasSeleccionadas) {
+            JButton boton = createButtonWithDynamicImage(planta.getImagePath(), new Color(205, 133, 63));
+            boton.addActionListener(e -> selectedPlant = planta);
             panelNorte.add(boton);
         }
 
@@ -104,35 +101,26 @@ public class VentanaJuegoPVP extends JFrame {
         );
         panelNorte.add(puntosCerebrosLabel);
 
-        // Infos 9 a 13: Zombis seleccionados en `VentanaPVP`
-        for (int i = 0; i < 5; i++) {
-            String zombieSeleccionado = i < zombiesSeleccionados.size() ? zombiesSeleccionados.get(i) : null;
-            String rutaImagen = zombieSeleccionado != null ? switch (zombieSeleccionado) {
-                case "Basic Zombie" -> "/presentation/images/images_Zombies/basicocarta.png";
-                case "Conehead" -> "/presentation/images/images_Zombies/conocarta.png";
-                case "Buckethead" -> "/presentation/images/images_Zombies/cubetacarta.png";
-                case "Brainstein" -> "/presentation/images/images_Zombies/cerebrocarta.png";
-                case "ECIZombie" -> "/presentation/images/images_Zombies/bombacarta.png";
-                default -> null;
-            } : "/presentation/images/images_Zombies/entrada.png";
-            JButton boton = createButtonWithDynamicImage(rutaImagen, new Color(70, 130, 180));
+        // Infos 9 a 13: Zombies seleccionados
+        for (Element zombie : zombiesSeleccionados) {
+            JButton boton = createButtonWithDynamicImage(zombie.getImagePath(), new Color(70, 130, 180));
             panelNorte.add(boton);
         }
 
         // Info 14: Jugador 2 con imagen y contador
+        JLabel[] contadorCerebrosLabelRef = new JLabel[1];
         JPanel panelJugador2 = createPlayerPanel(
-                nombreJugador2, "/presentation/images/images_Zombies/cerebro.png", contadorCerebrosJugador2, 80, new Color(245, 245, 220)
+                nombreJugador2, "/presentation/images/images_Zombies/cerebro.png", contadorCerebrosJugador2, 80, new Color(245, 245, 220), contadorCerebrosLabelRef
         );
+        contadorCerebrosJugador2Label = contadorCerebrosLabelRef[0];
         panelNorte.add(panelJugador2);
-
-        contadorCerebrosJugador2Label = (JLabel) panelJugador2.getComponent(2);
 
         panelPrincipal.add(panelNorte, BorderLayout.NORTH);
 
         // Panel central (CENTRO)
         JPanel panelCentro = new JPanel(new GridLayout(5, 10));
         panelCentro.setOpaque(false);
-        JButton[][] botones = new JButton[5][10];
+        botones = new JButton[5][10];
 
         for (int fila = 0; fila < 5; fila++) {
             for (int col = 0; col < 10; col++) {
@@ -144,6 +132,9 @@ public class VentanaJuegoPVP extends JFrame {
 
                 JButton boton = createButtonWithDynamicImage(imagePath, new Color(0, 100, 0));
                 botones[fila][col] = boton;
+
+                final int f = fila, c = col;
+                boton.addActionListener(e -> placePlantOnBoard(f, c));
                 panelCentro.add(boton);
             }
         }
@@ -154,11 +145,9 @@ public class VentanaJuegoPVP extends JFrame {
         panelSur.setOpaque(false);
         panelSur.setPreferredSize(new Dimension(0, 120));
 
-        // Info 15: Pala
         JButton info15 = createButtonWithFixedImage("/presentation/images/images_Plants/pala.png", new Color(139, 69, 19), 100);
         panelSur.add(info15, BorderLayout.WEST);
 
-        // Botón de menú
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
         panelSur.add(menuButton, BorderLayout.EAST);
 
@@ -170,9 +159,8 @@ public class VentanaJuegoPVP extends JFrame {
         labelDuracion.setForeground(Color.WHITE);
 
         labelTemporizador = new JLabel("Time left: " + formatTime(tiempoRestante), SwingConstants.CENTER);
-        labelTemporizador.setOpaque(false);
-        labelTemporizador.setForeground(Color.WHITE);
         labelTemporizador.setFont(new Font("Arial", Font.BOLD, 48));
+        labelTemporizador.setForeground(Color.WHITE);
 
         panelInfoSur.add(labelDuracion);
         panelInfoSur.add(labelTemporizador);
@@ -180,36 +168,15 @@ public class VentanaJuegoPVP extends JFrame {
 
         panelPrincipal.add(panelSur, BorderLayout.SOUTH);
 
-        startTimers(); // Inicia los temporizadores
+        startTimers();
         setVisible(true);
     }
 
-    private void startTimers() {
-        // Temporizador del tiempo de juego
-        timer = new Timer(1000, e -> {
-            if (tiempoRestante > 0) {
-                tiempoRestante--;
-                labelTemporizador.setText("Time left: " + formatTime(tiempoRestante));
-            } else {
-                stopTimers();
-                JOptionPane.showMessageDialog(this, "Time's up!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        timer.start();
-
-        // Temporizador de Info 1 (Soles del jugador 1)
-        timerSolesJugador1 = new Timer(10000, e -> {
-            contadorSolesJugador1 += 25;
-            contadorSolesJugador1Label.setText(String.valueOf(contadorSolesJugador1));
-        });
-        timerSolesJugador1.start();
-
-        // Temporizador de Info 14 (Cerebros del jugador 2)
-        timerCerebrosJugador2 = new Timer(10000, e -> {
-            contadorCerebrosJugador2 += 50;
-            contadorCerebrosJugador2Label.setText(String.valueOf(contadorCerebrosJugador2));
-        });
-        timerCerebrosJugador2.start();
+    private void placePlantOnBoard(int fila, int col) {
+        if (selectedPlant != null && board.isCellEmpty(fila, col)) {
+            board.setCellContent(fila, col, selectedPlant.getName());
+            botones[fila][col].setIcon(new ImageIcon(getClass().getResource(selectedPlant.getBoardImagePath())));
+        }
     }
 
     private void stopTimers() {
@@ -218,15 +185,27 @@ public class VentanaJuegoPVP extends JFrame {
         if (timerCerebrosJugador2 != null) timerCerebrosJugador2.stop();
     }
 
+    private void startTimers() {
+        timer = new Timer(1000, e -> {
+            if (tiempoRestante > 0) {
+                tiempoRestante--;
+                labelTemporizador.setText(formatTime(tiempoRestante));
+            } else {
+                timer.stop();
+                JOptionPane.showMessageDialog(this, "Time's up!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        timer.start();
+    }
+
     private String formatTime(int totalSeconds) {
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor) {
+    private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor, JLabel[] counterLabel) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         panel.setBackground(backgroundColor);
 
         JLabel nameLabel = new JLabel(playerName, SwingConstants.CENTER);
@@ -234,21 +213,20 @@ public class VentanaJuegoPVP extends JFrame {
         panel.add(nameLabel, BorderLayout.NORTH);
 
         JLabel imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         try {
             ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
             Image scaledImage = icon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
             imageLabel.setIcon(new ImageIcon(scaledImage));
         } catch (Exception e) {
-            System.out.println("Image not found: " + e.getMessage());
             imageLabel.setText("Image");
         }
         panel.add(imageLabel, BorderLayout.CENTER);
 
-        JLabel counterLabel = new JLabel(String.valueOf(initialCount), SwingConstants.CENTER);
-        counterLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        panel.add(counterLabel, BorderLayout.SOUTH);
+        JLabel counter = new JLabel(String.valueOf(initialCount), SwingConstants.CENTER);
+        counter.setFont(new Font("Arial", Font.BOLD, 14));
+        panel.add(counter, BorderLayout.SOUTH);
 
+        counterLabel[0] = counter;
         return panel;
     }
 
@@ -265,7 +243,7 @@ public class VentanaJuegoPVP extends JFrame {
             Image scaledImage = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
             label.setIcon(new ImageIcon(scaledImage));
         } catch (Exception e) {
-            System.out.println("Image not found: " + e.getMessage());
+            label.setText("Error");
         }
 
         label.setPreferredSize(new Dimension(size, size));
@@ -287,7 +265,7 @@ public class VentanaJuegoPVP extends JFrame {
                 }
             });
         } catch (Exception e) {
-            System.out.println("Image not found: " + e.getMessage());
+            button.setText("Error");
         }
         return button;
     }
@@ -300,14 +278,34 @@ public class VentanaJuegoPVP extends JFrame {
             Image scaledImage = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
             button.setIcon(new ImageIcon(scaledImage));
         } catch (Exception e) {
-            System.out.println("Image not found: " + e.getMessage());
+            button.setText("Error");
         }
         return button;
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
-                "Player 1", "Player 2", 200, 300, 5, List.of("Sunflower", "Peashooter"), List.of("Basic Zombie", "Conehead")
-        ));
+        SwingUtilities.invokeLater(() -> {
+            try {
+                List<Element> plantasSeleccionadas = Arrays.asList(
+                        new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.png"),
+                        new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.png"),
+                        new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.png"),
+                        new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.png"),
+                        new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.png")
+                );
+
+                List<Element> zombiesSeleccionados = Arrays.asList(
+                        new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.png"),
+                        new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/conehead1.png"),
+                        new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucket1.png"),
+                        new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brainstein1.png"),
+                        new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.png")
+                );
+
+                new VentanaJuegoPVP("Player 1", "Player 2", 200, 300, 5, plantasSeleccionadas, zombiesSeleccionados);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
