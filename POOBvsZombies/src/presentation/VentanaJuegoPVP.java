@@ -193,38 +193,49 @@ public class VentanaJuegoPVP extends JFrame {
             return;
         }
 
-        // Colocar una planta o zombie dependiendo de la selección
+        // Obtener el elemento seleccionado (planta o zombie)
         Element selectedElement = (selectedPlant != null) ? selectedPlant : selectedZombie;
 
-        if (selectedElement != null && board.isCellEmpty(fila, col)) {
-            board.setCellContent(fila, col, selectedElement.getName());
+        if (selectedElement == null) {
+            return; // Si no hay elemento seleccionado, no hacer nada
+        }
 
-            // Agregar GIF al botón sin reemplazar el fondo
-            try {
-                ImageIcon elementIcon = new ImageIcon(getClass().getResource(selectedElement.getBoardImagePath()));
-                botones[fila][col].setLayout(new BorderLayout());
-                JLabel gifLabel = new JLabel(elementIcon);
-                gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                gifLabel.setVerticalAlignment(SwingConstants.CENTER);
-
-                // Redimensionar el GIF al 75% del tamaño de la celda
-                int cellWidth = botones[fila][col].getWidth();
-                int cellHeight = botones[fila][col].getHeight();
-                int newWidth = (int) (cellWidth * 0.75); // 75% del ancho
-                int newHeight = (int) (cellHeight * 0.75); // 75% del alto
-
-                Image resizedGif = elementIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
-                gifLabel.setIcon(new ImageIcon(resizedGif));
-
-                botones[fila][col].add(gifLabel, BorderLayout.CENTER);
-                botones[fila][col].revalidate();
-                botones[fila][col].repaint();
-            } catch (Exception e) {
-                e.printStackTrace();
+        // Lógica para plantas: Solo se colocan en casillas vacías
+        if (selectedPlant != null) {
+            if (!board.isCellEmpty(fila, col)) {
+                return; // Salir si la casilla no está vacía
             }
+        }
+
+        // Actualizar contenido lógico
+        board.setCellContent(fila, col, selectedElement.getName());
+
+        // Agregar el GIF del elemento al botón
+        try {
+            ImageIcon elementIcon = new ImageIcon(getClass().getResource(selectedElement.getBoardImagePath()));
+            JLabel gifLabel = new JLabel(elementIcon);
+            gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            gifLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+            // Redimensionar el GIF al 75% del tamaño de la celda
+            int cellWidth = botones[fila][col].getWidth();
+            int cellHeight = botones[fila][col].getHeight();
+            int newWidth = (int) (cellWidth * 0.75); // 75% del ancho
+            int newHeight = (int) (cellHeight * 0.75); // 75% del alto
+
+            Image resizedGif = elementIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+            gifLabel.setIcon(new ImageIcon(resizedGif));
+
+            // Agregar el nuevo elemento al botón
+            botones[fila][col].add(gifLabel);
+            botones[fila][col].revalidate();
+            botones[fila][col].repaint();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    
     private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor, JLabel[] counterLabel) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(backgroundColor);
