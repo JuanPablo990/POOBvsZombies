@@ -56,4 +56,17 @@ public class Element {
     public String getBoardImagePath() {
         return boardImagePath;
     }
+
+    /**
+     * Método estático para crear un elemento LawnMower.
+     * 
+     * @return Una instancia del elemento LawnMower con sus imágenes configuradas.
+     */
+    public static Element createLawnMower() {
+        return new Element(
+            "Lawnmower",
+            "/presentation/images/images_Plants/podadora.png",
+            "/presentation/images/images_Plants/podadora.png"
+        );
+    }
 }

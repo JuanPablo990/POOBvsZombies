@@ -2,6 +2,7 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Arrays;
@@ -14,17 +15,21 @@ public class VentanaJuegoPVP extends JFrame {
     private JLabel contadorSolesJugador1Label;
     private JLabel contadorCerebrosJugador2Label;
     private JLabel labelTemporizador; // Label para el temporizador
+    private JLabel labelRonda; // Label para la ronda actual
     private int puntosSoles = 0;
     private int puntosCerebros = 0;
     private int contadorSolesJugador1 = 0;
     private int contadorCerebrosJugador2 = 0;
     private int tiempoRestante; // Tiempo restante en segundos
+    private int rondaActual = 1; // Ronda inicial
+    private final int maxRondas = 5; // Número máximo de rondas
+    private boolean primeraRondaDeColocacion = true; // Control de primera ronda
     private Timer timer; // Temporizador para cuenta regresiva
     private JButton[][] botones; // Matriz de botones para el tablero
     private Board board; // Tablero lógico
     private Element selectedPlant = null; // Planta seleccionada para colocar
     private Element selectedZombie = null; // Zombie seleccionado para colocar
-    private boolean removeMode = false; // Indica si estamos en modo "quitar elemento"
+    private boolean removeMode = false; // Modo "quitar elemento"
 
     public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<Element> plantasSeleccionadas, List<Element> zombiesSeleccionados) {
         super("POOBvsZombies - Player vs Player");
@@ -32,7 +37,7 @@ public class VentanaJuegoPVP extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Inicialización de contadores globales
-        tiempoRestante = duracionPartida * 60; // Convertimos duración en minutos a segundos
+        tiempoRestante = 2 * 60; // La primera ronda de colocación dura 2 minutos
         contadorSolesJugador1 = solesIniciales;
         contadorCerebrosJugador2 = cerebrosIniciales;
         board = new Board(5, 10); // Inicializamos el tablero lógico
@@ -67,12 +72,11 @@ public class VentanaJuegoPVP extends JFrame {
         };
         setContentPane(panelPrincipal);
 
-        // Panel superior (NORTE) para infos y jugadores
+        // Panel superior para infos y jugadores
         JPanel panelNorte = new JPanel(new GridLayout(1, 14));
         panelNorte.setOpaque(false);
         panelNorte.setPreferredSize(new Dimension(0, 150));
 
-        // Info 1: Jugador 1 con imagen y contador
         JLabel[] contadorSolesLabelRef = new JLabel[1];
         JPanel panelJugador1 = createPlayerPanel(
                 nombreJugador1, "/presentation/images/images_Plants/sol.png", contadorSolesJugador1, 80, new Color(245, 245, 220), contadorSolesLabelRef
@@ -80,41 +84,36 @@ public class VentanaJuegoPVP extends JFrame {
         contadorSolesJugador1Label = contadorSolesLabelRef[0];
         panelNorte.add(panelJugador1);
 
-        // Infos 2 a 6: Plantas seleccionadas
         for (Element planta : plantasSeleccionadas) {
             JButton boton = createButtonWithDynamicImage(planta.getImagePath(), new Color(205, 133, 63));
             boton.addActionListener(e -> {
                 selectedPlant = planta;
-                selectedZombie = null; // Desactivar selección de zombie
+                selectedZombie = null;
             });
             panelNorte.add(boton);
         }
 
-        // Info 7: Contador de soles global independiente
         puntosSolesLabel = createSquareLabelWithImageAndCenteredText(
                 "/presentation/images/images_Plants/puntos.png",
                 String.valueOf(puntosSoles), 150, new Color(0, 0, 0, 128)
         );
         panelNorte.add(puntosSolesLabel);
 
-        // Info 8: Contador de cerebros global independiente
         puntosCerebrosLabel = createSquareLabelWithImageAndCenteredText(
                 "/presentation/images/images_Zombies/puntoszombies.png",
                 String.valueOf(puntosCerebros), 150, new Color(0, 0, 0, 128)
         );
         panelNorte.add(puntosCerebrosLabel);
 
-        // Infos 9 a 13: Zombies seleccionados
         for (Element zombie : zombiesSeleccionados) {
             JButton boton = createButtonWithDynamicImage(zombie.getImagePath(), new Color(70, 130, 180));
             boton.addActionListener(e -> {
                 selectedZombie = zombie;
-                selectedPlant = null; // Desactivar selección de planta
+                selectedPlant = null;
             });
             panelNorte.add(boton);
         }
 
-        // Info 14: Jugador 2 con imagen y contador
         JLabel[] contadorCerebrosLabelRef = new JLabel[1];
         JPanel panelJugador2 = createPlayerPanel(
                 nombreJugador2, "/presentation/images/images_Zombies/cerebro.png", contadorCerebrosJugador2, 80, new Color(245, 245, 220), contadorCerebrosLabelRef
@@ -124,7 +123,7 @@ public class VentanaJuegoPVP extends JFrame {
 
         panelPrincipal.add(panelNorte, BorderLayout.NORTH);
 
-        // Panel central (CENTRO) para el tablero de juego
+        // Panel central para el tablero
         JPanel panelCentro = new JPanel(new GridLayout(5, 10));
         panelCentro.setOpaque(false);
         botones = new JButton[5][10];
@@ -147,19 +146,26 @@ public class VentanaJuegoPVP extends JFrame {
         }
         panelPrincipal.add(panelCentro, BorderLayout.CENTER);
 
-        // Panel inferior (SUR) para controles adicionales
+        // Panel inferior para controles adicionales
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setOpaque(false);
         panelSur.setPreferredSize(new Dimension(0, 120));
 
         JButton info15 = createButtonWithFixedImage("/presentation/images/images_Plants/pala.png", new Color(139, 69, 19), 100);
-        info15.addActionListener(e -> removeMode = true); // Activar modo "quitar elemento"
+        info15.addActionListener(e -> removeMode = true);
         panelSur.add(info15, BorderLayout.WEST);
 
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
         panelSur.add(menuButton, BorderLayout.EAST);
 
-        JPanel panelInfoSur = new JPanel(new GridLayout(2, 1));
+        JButton nextRoundButton = new JButton("Next Round");
+        nextRoundButton.setFont(new Font("Arial", Font.BOLD, 16));
+        nextRoundButton.setBackground(new Color(0, 128, 0));
+        nextRoundButton.setForeground(Color.WHITE);
+        nextRoundButton.addActionListener(e -> avanzarRonda());
+        panelSur.add(nextRoundButton, BorderLayout.SOUTH);
+
+        JPanel panelInfoSur = new JPanel(new GridLayout(3, 1));
         panelInfoSur.setOpaque(false);
 
         JLabel labelDuracion = new JLabel("Duration: " + duracionPartida + " minutes", SwingConstants.CENTER);
@@ -170,8 +176,13 @@ public class VentanaJuegoPVP extends JFrame {
         labelTemporizador.setFont(new Font("Arial", Font.BOLD, 48));
         labelTemporizador.setForeground(Color.WHITE);
 
+        labelRonda = new JLabel("Round: " + rondaActual, SwingConstants.CENTER);
+        labelRonda.setFont(new Font("Arial", Font.BOLD, 16));
+        labelRonda.setForeground(Color.WHITE);
+
         panelInfoSur.add(labelDuracion);
         panelInfoSur.add(labelTemporizador);
+        panelInfoSur.add(labelRonda);
         panelSur.add(panelInfoSur, BorderLayout.CENTER);
 
         panelPrincipal.add(panelSur, BorderLayout.SOUTH);
@@ -180,53 +191,79 @@ public class VentanaJuegoPVP extends JFrame {
         setVisible(true);
     }
 
+    private void startTimers() {
+        timer = new Timer(1000, e -> {
+            if (tiempoRestante > 0) {
+                tiempoRestante--;
+                labelTemporizador.setText(formatTime(tiempoRestante));
+            } else {
+                timer.stop();
+                avanzarRonda();
+            }
+        });
+        timer.start();
+    }
+
+    private void avanzarRonda() {
+        if (primeraRondaDeColocacion) {
+            primeraRondaDeColocacion = false;
+            tiempoRestante = 5 * 60; // Comienza la partida normal
+        } else if (rondaActual < maxRondas) {
+            rondaActual++;
+            tiempoRestante = 5 * 60; // Tiempo de cada ronda
+        } else {
+            JOptionPane.showMessageDialog(this, "Game Over! All rounds completed.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            stopTimers();
+        }
+        labelRonda.setText("Round: " + rondaActual);
+        labelTemporizador.setText(formatTime(tiempoRestante));
+        timer.start();
+    }
+
+    private void stopTimers() {
+        if (timer != null) timer.stop();
+    }
+
+    private String formatTime(int totalSeconds) {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     private void placeElementOnBoard(int fila, int col) {
-        // Modo "quitar elemento"
         if (removeMode) {
             if (!board.isCellEmpty(fila, col)) {
-                board.setCellContent(fila, col, null); // Eliminar contenido lógico
-                botones[fila][col].removeAll(); // Limpiar el botón visualmente
+                board.setCellContent(fila, col, null);
+                botones[fila][col].removeAll();
                 botones[fila][col].revalidate();
                 botones[fila][col].repaint();
             }
-            removeMode = false; // Salir del modo "quitar elemento" después del clic
+            removeMode = false;
             return;
         }
 
-        // Obtener el elemento seleccionado (planta o zombie)
         Element selectedElement = (selectedPlant != null) ? selectedPlant : selectedZombie;
 
-        if (selectedElement == null) {
-            return; // Si no hay elemento seleccionado, no hacer nada
-        }
+        if (selectedElement == null) return;
 
-        // Lógica para plantas: Solo se colocan en casillas vacías
-        if (selectedPlant != null) {
-            if (!board.isCellEmpty(fila, col)) {
-                return; // Salir si la casilla no está vacía
-            }
-        }
+        if (selectedPlant != null && !board.isCellEmpty(fila, col)) return;
 
-        // Actualizar contenido lógico
         board.setCellContent(fila, col, selectedElement.getName());
 
-        // Agregar el GIF del elemento al botón
         try {
             ImageIcon elementIcon = new ImageIcon(getClass().getResource(selectedElement.getBoardImagePath()));
             JLabel gifLabel = new JLabel(elementIcon);
             gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
             gifLabel.setVerticalAlignment(SwingConstants.CENTER);
 
-            // Redimensionar el GIF al 75% del tamaño de la celda
             int cellWidth = botones[fila][col].getWidth();
             int cellHeight = botones[fila][col].getHeight();
-            int newWidth = (int) (cellWidth * 0.75); // 75% del ancho
-            int newHeight = (int) (cellHeight * 0.75); // 75% del alto
+            int newWidth = (int) (cellWidth * 0.75);
+            int newHeight = (int) (cellHeight * 0.75);
 
             Image resizedGif = elementIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
             gifLabel.setIcon(new ImageIcon(resizedGif));
 
-            // Agregar el nuevo elemento al botón
             botones[fila][col].add(gifLabel);
             botones[fila][col].revalidate();
             botones[fila][col].repaint();
@@ -234,6 +271,9 @@ public class VentanaJuegoPVP extends JFrame {
             e.printStackTrace();
         }
     }
+
+
+
 
     
     private JPanel createPlayerPanel(String playerName, String imagePath, int initialCount, int iconSize, Color backgroundColor, JLabel[] counterLabel) {
@@ -315,28 +355,7 @@ public class VentanaJuegoPVP extends JFrame {
         return button;
     }
 
-    private void startTimers() {
-        timer = new Timer(1000, e -> {
-            if (tiempoRestante > 0) {
-                tiempoRestante--;
-                labelTemporizador.setText(formatTime(tiempoRestante));
-            } else {
-                timer.stop();
-                JOptionPane.showMessageDialog(this, "Time's up!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        timer.start();
-    }
-
-    private void stopTimers() {
-        if (timer != null) timer.stop();
-    }
-
-    private String formatTime(int totalSeconds) {
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        return String.format("%02d:%02d", minutes, seconds);
-    }
+  
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

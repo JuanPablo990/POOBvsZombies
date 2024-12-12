@@ -2,7 +2,7 @@ package presentation;
 
 /**
  * Clase que representa el tablero lógico del juego.
- * Gestiona el estado de las celdas (vacías u ocupadas por plantas/zombis).
+ * Gestiona el estado de las celdas (vacías u ocupadas por plantas/zombis/podadoras).
  */
 public class Board {
     private final String[][] cells; // Matriz lógica del tablero
@@ -11,7 +11,7 @@ public class Board {
 
     /**
      * Constructor de la clase Board.
-     * 
+     *
      * @param rows Número de filas del tablero.
      * @param cols Número de columnas del tablero.
      */
@@ -24,18 +24,23 @@ public class Board {
 
     /**
      * Inicializa el tablero colocando todas las celdas en "Empty".
+     * También coloca las podadoras en la primera columna.
      */
     private void initializeBoard() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                cells[i][j] = "Empty"; // Todas las celdas comienzan vacías
+                if (j == 0) {
+                    cells[i][j] = "Lawnmower"; // Colocar podadoras en la primera columna
+                } else {
+                    cells[i][j] = "Empty"; // Resto de las celdas comienzan vacías
+                }
             }
         }
     }
 
     /**
      * Verifica si una celda específica está vacía.
-     * 
+     *
      * @param row Fila de la celda.
      * @param col Columna de la celda.
      * @return true si la celda está vacía, false si está ocupada.
@@ -45,8 +50,19 @@ public class Board {
     }
 
     /**
+     * Verifica si una celda específica contiene una podadora.
+     *
+     * @param row Fila de la celda.
+     * @param col Columna de la celda.
+     * @return true si la celda contiene una podadora, false de lo contrario.
+     */
+    public boolean isCellLawnmower(int row, int col) {
+        return cells[row][col].equals("Lawnmower");
+    }
+
+    /**
      * Actualiza el contenido de una celda específica.
-     * 
+     *
      * @param row       Fila de la celda.
      * @param col       Columna de la celda.
      * @param contenido Nombre del elemento que ocupará la celda.
@@ -57,10 +73,10 @@ public class Board {
 
     /**
      * Obtiene el contenido de una celda específica.
-     * 
+     *
      * @param row Fila de la celda.
      * @param col Columna de la celda.
-     * @return Contenido de la celda (e.g., "Sunflower", "Empty").
+     * @return Contenido de la celda (e.g., "Sunflower", "Empty", "Lawnmower").
      */
     public String getCellContent(int row, int col) {
         return cells[row][col];
