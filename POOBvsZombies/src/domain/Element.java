@@ -1,4 +1,5 @@
-package presentation;
+package domain;
+
 
 public class Element {
     private final String name;               // Nombre del elemento (e.g., Sunflower, Peashooter)

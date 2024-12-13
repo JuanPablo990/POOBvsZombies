@@ -8,6 +8,10 @@ import java.awt.event.ComponentEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import domain.Element; // Clase Element en el paquete domain
+import domain.Board;   // Clase Board en el paquete domain
+import domain.RulePVP; // Clase RulePVP para las reglas del juego
+
 public class VentanaJuegoPVP extends JFrame {
 
     private JLabel puntosSolesLabel;
@@ -31,6 +35,9 @@ public class VentanaJuegoPVP extends JFrame {
     private Element selectedZombie = null; // Zombie seleccionado para colocar
     private boolean removeMode = false; // Modo "quitar elemento"
 
+    
+    private RulePVP reglas; // Instancia de reglas
+    
     public VentanaJuegoPVP(String nombreJugador1, String nombreJugador2, int solesIniciales, int cerebrosIniciales, int duracionPartida, List<Element> plantasSeleccionadas, List<Element> zombiesSeleccionados) {
         super("POOBvsZombies - Player vs Player");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -42,6 +49,9 @@ public class VentanaJuegoPVP extends JFrame {
         contadorCerebrosJugador2 = cerebrosIniciales;
         board = new Board(5, 10); // Inicializamos el tablero lógico
 
+        // Inicialización de las reglas del juego
+        reglas = new RulePVP(duracionPartida);
+        
         // Crear barra de menús
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -193,32 +203,31 @@ public class VentanaJuegoPVP extends JFrame {
 
     private void startTimers() {
         timer = new Timer(1000, e -> {
-            if (tiempoRestante > 0) {
-                tiempoRestante--;
-                labelTemporizador.setText(formatTime(tiempoRestante));
+            if (!reglas.isGameOver()) {
+                reglas.advanceTime(); // Avanza el tiempo en las reglas
+                labelTemporizador.setText(formatTime(reglas.getRemainingMinutes() * 60)); // Actualiza el temporizador
+                labelRonda.setText("Round: " + reglas.getCurrentRound()); // Actualiza la ronda actual
+
+                // Detecta cambio de fase
+                if (reglas.isPhaseChange()) {
+                    JOptionPane.showMessageDialog(this, "Phase changed to: " + 
+                        (reglas.isPlantTurn() ? "Planting Phase" : "Zombie Attack Phase"));
+                }
             } else {
+                JOptionPane.showMessageDialog(this, "Game Over! All rounds completed.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                 timer.stop();
-                avanzarRonda();
             }
         });
         timer.start();
     }
 
+
     private void avanzarRonda() {
-        if (primeraRondaDeColocacion) {
-            primeraRondaDeColocacion = false;
-            tiempoRestante = 5 * 60; // Comienza la partida normal
-        } else if (rondaActual < maxRondas) {
-            rondaActual++;
-            tiempoRestante = 5 * 60; // Tiempo de cada ronda
-        } else {
-            JOptionPane.showMessageDialog(this, "Game Over! All rounds completed.", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-            stopTimers();
-        }
-        labelRonda.setText("Round: " + rondaActual);
-        labelTemporizador.setText(formatTime(tiempoRestante));
-        timer.start();
+        reglas.skipPhase(); // Avanza la fase o ronda manualmente
+        labelTemporizador.setText(formatTime(reglas.getRemainingMinutes() * 60));
+        labelRonda.setText("Round: " + reglas.getCurrentRound());
     }
+
 
     private void stopTimers() {
         if (timer != null) timer.stop();
@@ -230,8 +239,10 @@ public class VentanaJuegoPVP extends JFrame {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
+    
     private void placeElementOnBoard(int fila, int col) {
         if (removeMode) {
+            // Eliminar el contenido de la celda si está en modo de eliminación
             if (!board.isCellEmpty(fila, col)) {
                 board.setCellContent(fila, col, null);
                 botones[fila][col].removeAll();
@@ -244,12 +255,25 @@ public class VentanaJuegoPVP extends JFrame {
 
         Element selectedElement = (selectedPlant != null) ? selectedPlant : selectedZombie;
 
-        if (selectedElement == null) return;
+        if (selectedElement == null) {
+            JOptionPane.showMessageDialog(this, "No element selected.");
+            return;
+        }
 
-        if (selectedPlant != null && !board.isCellEmpty(fila, col)) return;
+        // Verificar la validez de la colocación según el tipo de elemento
+        boolean validPlacement = selectedPlant != null 
+            ? reglas.isPlantPlacementValid(fila, col)
+            : reglas.isZombiePlacementValid(fila, col);
 
+        if (!validPlacement) {
+            JOptionPane.showMessageDialog(this, "Invalid placement for this element.");
+            return;
+        }
+
+        // Colocar el contenido en el tablero lógico
         board.setCellContent(fila, col, selectedElement.getName());
 
+        // Mostrar el GIF en el botón correspondiente
         try {
             ImageIcon elementIcon = new ImageIcon(getClass().getResource(selectedElement.getBoardImagePath()));
             JLabel gifLabel = new JLabel(elementIcon);
@@ -264,11 +288,13 @@ public class VentanaJuegoPVP extends JFrame {
             Image resizedGif = elementIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
             gifLabel.setIcon(new ImageIcon(resizedGif));
 
+            botones[fila][col].removeAll();
             botones[fila][col].add(gifLabel);
             botones[fila][col].revalidate();
             botones[fila][col].repaint();
         } catch (Exception e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error displaying element image.");
         }
     }
 

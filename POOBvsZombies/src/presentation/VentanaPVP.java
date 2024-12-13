@@ -1,6 +1,9 @@
 package presentation;
 
 import javax.swing.*;
+
+import domain.Element;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;

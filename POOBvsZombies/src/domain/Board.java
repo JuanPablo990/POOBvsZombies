@@ -1,4 +1,4 @@
-package presentation;
+package domain;
 
 /**
  * Clase que representa el tablero lógico del juego.
@@ -46,7 +46,7 @@ public class Board {
      * @return true si la celda está vacía, false si está ocupada.
      */
     public boolean isCellEmpty(int row, int col) {
-        return cells[row][col].equals("Empty");
+        return "Empty".equals(cells[row][col]); // Evita NullPointerException
     }
 
     /**
@@ -57,7 +57,7 @@ public class Board {
      * @return true si la celda contiene una podadora, false de lo contrario.
      */
     public boolean isCellLawnmower(int row, int col) {
-        return cells[row][col].equals("Lawnmower");
+        return "Lawnmower".equals(cells[row][col]); // Evita NullPointerException
     }
 
     /**
@@ -65,10 +65,14 @@ public class Board {
      *
      * @param row       Fila de la celda.
      * @param col       Columna de la celda.
-     * @param contenido Nombre del elemento que ocupará la celda.
+     * @param contenido Nombre del elemento que ocupará la celda (o null para vaciarla).
      */
     public void setCellContent(int row, int col, String contenido) {
-        cells[row][col] = contenido;
+        if (contenido == null) {
+            cells[row][col] = "Empty"; // Asegúrate de que no quede como null
+        } else {
+            cells[row][col] = contenido;
+        }
     }
 
     /**
