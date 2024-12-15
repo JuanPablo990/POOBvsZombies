@@ -1,10 +1,10 @@
 package presentation;
 
 import javax.swing.*;
-
-import domain.Element;
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +15,8 @@ public class VentanaPVP extends JFrame {
     private JSpinner solesIniciales;
     private JSpinner cerebrosIniciales;
     private JSpinner duracionPartida;
-
-    private ArrayList<Element> plantasSeleccionadas = new ArrayList<>();
-    private ArrayList<Element> zombiesSeleccionados = new ArrayList<>();
-
+    private List<String> plantasSeleccionadas = new ArrayList<>();
+    private List<String> zombiesSeleccionados = new ArrayList<>();
     private Runnable stopMusicCallback;
 
     public VentanaPVP(JFrame parent, Runnable stopMusicCallback) {
@@ -110,9 +108,9 @@ public class VentanaPVP extends JFrame {
         JPanel selectionPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         selectionPanel.setOpaque(false);
 
-        List<Element> elementos = isPlant ? getPlantasDisponibles() : getZombiesDisponibles();
-        for (Element elemento : elementos) {
-            JButton boton = createElementButton(elemento, isPlant);
+        List<String> elementos = isPlant ? getPlantasDisponibles() : getZombiesDisponibles();
+        for (String elementoPath : elementos) {
+            JButton boton = createImageButton(elementoPath, isPlant);
             selectionPanel.add(boton);
         }
 
@@ -121,18 +119,18 @@ public class VentanaPVP extends JFrame {
         return panel;
     }
 
-    private JButton createElementButton(Element elemento, boolean isPlant) {
+    private JButton createImageButton(String imagePath, boolean isPlant) {
         JButton boton = new JButton();
         boton.setOpaque(false);
         boton.setContentAreaFilled(false);
         boton.setBorderPainted(false);
 
         try {
-            ImageIcon icono = new ImageIcon(getClass().getResource(elemento.getImagePath()));
+            ImageIcon icono = new ImageIcon(getClass().getResource(imagePath));
 
-            boton.addComponentListener(new java.awt.event.ComponentAdapter() {
+            boton.addComponentListener(new ComponentAdapter() {
                 @Override
-                public void componentResized(java.awt.event.ComponentEvent e) {
+                public void componentResized(ComponentEvent e) {
                     int width = boton.getWidth();
                     int height = boton.getHeight();
                     if (width > 0 && height > 0) {
@@ -142,43 +140,43 @@ public class VentanaPVP extends JFrame {
                 }
             });
         } catch (Exception e) {
-            boton.setText(elemento.getName());
+            boton.setText("Error");
         }
 
-        boton.addActionListener(e -> toggleSelection(boton, elemento, isPlant));
+        boton.addActionListener(e -> toggleSelection(boton, imagePath, isPlant));
         return boton;
     }
 
-    private void toggleSelection(JButton boton, Element elemento, boolean isPlant) {
-        List<Element> seleccionados = isPlant ? plantasSeleccionadas : zombiesSeleccionados;
-        if (seleccionados.contains(elemento)) {
-            seleccionados.remove(elemento);
-            boton.setBackground(null);
+    private void toggleSelection(JButton boton, String imagePath, boolean isPlant) {
+        List<String> seleccionados = isPlant ? plantasSeleccionadas : zombiesSeleccionados;
+        if (seleccionados.contains(imagePath)) {
+            seleccionados.remove(imagePath);
+            boton.setBorderPainted(false);
             boton.setOpaque(false);
         } else {
-            seleccionados.add(elemento);
-            boton.setBackground(new Color(0, 255, 0, 128));
+            seleccionados.add(imagePath);
+            boton.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
             boton.setOpaque(true);
         }
     }
 
-    private List<Element> getPlantasDisponibles() {
+    private List<String> getPlantasDisponibles() {
         return List.of(
-            new Element("Sunflower", "/presentation/images/images_Plants/girasolcarta.png", "/presentation/images/images_Plants/girasol1.gif"),
-            new Element("Peashooter", "/presentation/images/images_Plants/tiracarta.png", "/presentation/images/images_Plants/tira1.gif"),
-            new Element("Wall-nut", "/presentation/images/images_Plants/nuescarta.png", "/presentation/images/images_Plants/nuez1.gif"),
-            new Element("Potato Mine", "/presentation/images/images_Plants/pumcarta.png", "/presentation/images/images_Plants/pum.gif"),
-            new Element("ECIplant", "/presentation/images/images_Plants/ecicarta.png", "/presentation/images/images_Plants/eci.gif")
+            "/presentation/images/images_Plants/girasolcarta.png",
+            "/presentation/images/images_Plants/tiracarta.png",
+            "/presentation/images/images_Plants/nuescarta.png",
+            "/presentation/images/images_Plants/pumcarta.png",
+            "/presentation/images/images_Plants/ecicarta.png"
         );
     }
 
-    private List<Element> getZombiesDisponibles() {
+    private List<String> getZombiesDisponibles() {
         return List.of(
-            new Element("Basic Zombie", "/presentation/images/images_Zombies/basicocarta.png", "/presentation/images/images_Zombies/basic1.gif"),
-            new Element("Conehead", "/presentation/images/images_Zombies/conocarta.png", "/presentation/images/images_Zombies/cone1.gif"),
-            new Element("Buckethead", "/presentation/images/images_Zombies/cubetacarta.png", "/presentation/images/images_Zombies/bucet1.gif"),
-            new Element("Brainstein", "/presentation/images/images_Zombies/cerebrocarta.png", "/presentation/images/images_Zombies/brain1.gif"),
-            new Element("ECIZombie", "/presentation/images/images_Zombies/bombacarta.png", "/presentation/images/images_Zombies/bomba1.gif")
+            "/presentation/images/images_Zombies/basicocarta.png",
+            "/presentation/images/images_Zombies/conocarta.png",
+            "/presentation/images/images_Zombies/cubetacarta.png",
+            "/presentation/images/images_Zombies/cerebrocarta.png",
+            "/presentation/images/images_Zombies/bombacarta.png"
         );
     }
 
@@ -198,13 +196,13 @@ public class VentanaPVP extends JFrame {
         }
 
         SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
-            nombreJugador1.getText(),
-            nombreJugador2.getText(),
-            (int) solesIniciales.getValue(),
-            (int) cerebrosIniciales.getValue(),
-            (int) duracionPartida.getValue(),
-            plantasSeleccionadas,
-            zombiesSeleccionados
+                nombreJugador1.getText(),
+                nombreJugador2.getText(),
+                (int) solesIniciales.getValue(),
+                (int) cerebrosIniciales.getValue(),
+                (int) duracionPartida.getValue(),
+                plantasSeleccionadas,
+                zombiesSeleccionados
         ));
         dispose();
     }
