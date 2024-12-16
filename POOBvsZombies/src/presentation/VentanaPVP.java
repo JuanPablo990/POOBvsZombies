@@ -1,8 +1,8 @@
 package presentation;
 
+import domain.POOBvsZombies; // Importar la clase POOBvsZombies
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
@@ -195,6 +195,15 @@ public class VentanaPVP extends JFrame {
             stopMusicCallback.run();
         }
 
+        // Guardar configuración en POOBvsZombies
+        POOBvsZombies juego = new POOBvsZombies(
+                (int) solesIniciales.getValue(),
+                (int) cerebrosIniciales.getValue(),
+                (int) duracionPartida.getValue(),
+                plantasSeleccionadas,
+                zombiesSeleccionados
+        );
+
         SwingUtilities.invokeLater(() -> new VentanaJuegoPVP(
                 nombreJugador1.getText(),
                 nombreJugador2.getText(),
@@ -203,7 +212,8 @@ public class VentanaPVP extends JFrame {
                 (int) duracionPartida.getValue(),
                 plantasSeleccionadas,
                 zombiesSeleccionados
-        ));
+        ).setVisible(true));
+
         dispose();
     }
 

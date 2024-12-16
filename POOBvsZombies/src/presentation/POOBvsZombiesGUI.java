@@ -1,16 +1,12 @@
 package presentation;
 
-import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
 
 public class POOBvsZombiesGUI extends JFrame {
 
     private FondoPanel fondo = new FondoPanel("/presentation/images/windows/menu.png");
-    private Clip backgroundMusic;
 
     // Declaración de botones para la pantalla principal del juego
     private JButton buttonPVSM = new JButton();
@@ -82,9 +78,6 @@ public class POOBvsZombiesGUI extends JFrame {
         revalidate();
         repaint();
 
-        // Iniciar música de fondo
-        startBackgroundMusic("/presentation/songs/menu.wav");
-
         // Crear barra de menús
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -131,33 +124,13 @@ public class POOBvsZombiesGUI extends JFrame {
         });
     }
 
-    private void startBackgroundMusic(String musicPath) {
-        try {
-            File audioFile = new File(getClass().getResource(musicPath).getFile());
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            backgroundMusic = AudioSystem.getClip();
-            backgroundMusic.open(audioStream);
-            backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY); // Repetir continuamente
-            backgroundMusic.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            System.out.println("Error loading background music: " + e.getMessage());
-        }
-    }
-
-    private void stopBackgroundMusic() {
-        if (backgroundMusic != null && backgroundMusic.isRunning()) {
-            backgroundMusic.stop();
-            backgroundMusic.close();
-        }
-    }
-
     private void openPvsMWindow() {
         VentanaPvsM ventanaPvsM = new VentanaPvsM(this);
         ventanaPvsM.setVisible(true);
     }
 
     private void openPVPWindow() {
-        VentanaPVP ventanaPVP = new VentanaPVP(this, this::stopBackgroundMusic); // Paso el método para detener la música
+        VentanaPVP ventanaPVP = new VentanaPVP(this, null);
         ventanaPVP.setVisible(true);
     }
 
@@ -165,7 +138,6 @@ public class POOBvsZombiesGUI extends JFrame {
         int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Confirm exit",
                 JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            stopBackgroundMusic(); // Detener música al salir
             System.exit(0);
         }
     }

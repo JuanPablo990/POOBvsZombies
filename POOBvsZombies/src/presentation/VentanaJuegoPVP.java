@@ -38,20 +38,13 @@ public class VentanaJuegoPVP extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        JMenu menuArchivo = new JMenu("File");
+        JMenu menuArchivo = new JMenu("Archive");
         menuBar.add(menuArchivo);
 
         JMenuItem menuItemExit = new JMenuItem("Exit");
         menuArchivo.add(menuItemExit);
 
-        menuItemExit.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Confirm Exit",
-                    JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                stopTimers();
-                dispose();
-            }
-        });
+        menuItemExit.addActionListener(e -> confirmExit());
 
         JPanel panelPrincipal = new JPanel(new BorderLayout()) {
             @Override
@@ -132,6 +125,7 @@ public class VentanaJuegoPVP extends JFrame {
         panelSur.add(info15, BorderLayout.WEST);
 
         JButton menuButton = createButtonWithFixedImage("/presentation/images/windows/menujuego.png", new Color(245, 245, 220), 100);
+        menuButton.addActionListener(e -> returnToMainMenu());
         panelSur.add(menuButton, BorderLayout.EAST);
 
         JButton nextRoundButton = new JButton("Next Round");
@@ -165,9 +159,22 @@ public class VentanaJuegoPVP extends JFrame {
         setVisible(true);
     }
 
-    private void stopTimers() {
-        if (timer != null) {
-            timer.stop();
+    private void returnToMainMenu() {
+        int confirm = JOptionPane.showConfirmDialog(this, "Do you want to return to the main menu?", "Confirm", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            dispose();
+            SwingUtilities.invokeLater(() -> new POOBvsZombiesGUI().setVisible(true));
+        }
+    }
+
+    private void confirmExit() {
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Confirm exit",
+                JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (timer != null) {
+                timer.stop();
+            }
+            System.exit(0);
         }
     }
 
